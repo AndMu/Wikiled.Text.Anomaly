@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wikiled.Text.Anomaly", "Wikiled.Text.Anomaly\Wikiled.Text.Anomaly.csproj", "{037C8667-8839-4878-AB57-8562DD779164}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wikiled.Text.Anomaly.Tests", "Wikiled.Text.Anomaly.Tests\Wikiled.Text.Anomaly.Tests.csproj", "{E839E9AF-AB1E-4B98-93BC-9C084800E039}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{037C8667-8839-4878-AB57-8562DD779164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{037C8667-8839-4878-AB57-8562DD779164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{037C8667-8839-4878-AB57-8562DD779164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{037C8667-8839-4878-AB57-8562DD779164}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E839E9AF-AB1E-4B98-93BC-9C084800E039}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E839E9AF-AB1E-4B98-93BC-9C084800E039}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E839E9AF-AB1E-4B98-93BC-9C084800E039}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E839E9AF-AB1E-4B98-93BC-9C084800E039}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {635F2295-F5D6-4362-8D98-D884522DFE57}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
+EndGlobal

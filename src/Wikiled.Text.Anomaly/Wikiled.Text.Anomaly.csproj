@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+
+  <PropertyGroup>
+    <TargetFramework>NETSTANDARD2.0</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <Authors>Wikiled</Authors>
+    <Description>Wikiled Text Anomaly Analysis library</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <ProjectUrl>https://github.com/AndMu/Wikiled.Anomaly</ProjectUrl>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);IncludeP2PAssets</TargetsForTfmSpecificBuildOutput>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Wikiled.MachineLearning" Version="2.2.0" />
+    <PackageReference Include="Wikiled.Text.Analysis" Version="1.6.12" />
+    <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.9" />
+    <PackageReference Include="Wikiled.Text.Style" Version="1.0.4" />
+  </ItemGroup>
+  
+  <Target Name="IncludeP2PAssets">
+    <ItemGroup>
+      <BuildOutputInPackage Include="$(OutputPath)Wikiled.Text.Anomaly.dll" />
+      <BuildOutputInPackage Include="$(OutputPath)Wikiled.Text.Anomaly.pdb" />
+    </ItemGroup>
+  </Target>
+
+</Project>
