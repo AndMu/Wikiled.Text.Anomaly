@@ -23,8 +23,6 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        private static readonly IMapCategory MapFull = new CategoriesMapper().Construct<TextBlock>();
-
         private readonly SentenceItem[] sentences;
 
         private ILookup<SentenceItem, SentenceItem> anomalyLookup;
@@ -33,15 +31,9 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private double windowSize;
 
-        private readonly IStyleFactory styleFactory;
-
-        private readonly INRCDictionary dictionary;
-
-        public DocumentAnomalyDetector(IStyleFactory styleFactory, INRCDictionary dictionary, Document document)
+        public DocumentAnomalyDetector(Document document)
         {
             Document = document;
-            this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
-            this.styleFactory = styleFactory ?? throw new ArgumentNullException(nameof(styleFactory));
             sentences = Document.Sentences.ToArray();
             AnomalyThreshold = 0.1;
             windowSize = 0.1;
@@ -65,8 +57,6 @@ namespace Wikiled.Text.Anomaly.Processing
             }
         }
 
-        public AnomalyVectorType AnomalyVectorType { get; set; }
-
         public Document Document { get; }
 
         public int MinimumSentencesCount => (int)Math.Ceiling(sentences.Length * WindowSize);
@@ -78,8 +68,6 @@ namespace Wikiled.Text.Anomaly.Processing
                 return (int)Math.Ceiling(sentences.Sum(item => item.Words.Count) * WindowSize);
             }
         }
-
-        public VectorData RemainingVector { get; set; }
 
         public bool UseSentimentClusters { get; set; }
 
@@ -119,30 +107,7 @@ namespace Wikiled.Text.Anomaly.Processing
             IEnumerable<SentenceItem[]> sentenceClusters = UseSentimentClusters
                                                                ? GetSentencesBlockForRegions(clusters)
                                                                : GetSentencesBlock();
-            Parallel.ForEach(
-                sentenceClusters,
-                segment =>
-                {
-                    if (segment.Length == 0)
-                    {
-                        return;
-                    }
-
-                    VectorData currentVector = GetVector(segment, NormalizationType.L2);
-                    var remainingSentences = sentences.Where(item => !segment.Contains(item)).ToArray();
-                    if (remainingSentences.Length == 0)
-                    {
-                        return;
-                    }
-
-                    VectorData remainingVector = RemainingVector ?? GetVector(remainingSentences, NormalizationType.L2);
-                    double distance = distanceLogic.Measure(currentVector, remainingVector);
-                    list.Add(
-                        new ItemProbability<SentenceItem[]>(segment)
-                        {
-                            Probability = Math.Abs(distance)
-                        });
-                });
+            throw new NotImplementedException();
 
             var processed = list.OrderBy(item => item.Probability);
             Reset();
@@ -183,11 +148,7 @@ namespace Wikiled.Text.Anomaly.Processing
             return items.ToArray();
         }
 
-        public VectorData GetDocumentVector(NormalizationType normalization)
-        {
-            return GetVector(Document.Sentences, normalization);
-        }
-
+        
         public bool IsInAnomaly(SentenceItem sentence)
         {
             return anomalyLookup != null && anomalyLookup.Contains(sentence);
@@ -210,35 +171,6 @@ namespace Wikiled.Text.Anomaly.Processing
         private IEnumerable<SentenceItem[]> GetSentencesBlockForRegions(ClusterRegion[] regions)
         {
             return regions.Select(GetData);
-        }
-
-        private DataTree GetTree(ITextBlock block)
-        {
-            var vector = dictionary.Extract(block.Words);
-            return vector.GetTree();
-        }
-
-        private VectorData GetVector(IEnumerable<SentenceItem> normalBlock, NormalizationType normalization)
-        {
-            var normal = styleFactory.ConstructTextBlock(normalBlock.ToArray());
-            DataTree tree;
-            switch (AnomalyVectorType)
-            {
-                case AnomalyVectorType.Full:
-                    tree = new DataTree(normal, MapFull);
-                    break;
-                case AnomalyVectorType.Inquirer:
-                    tree = normal.InquirerFinger.InquirerProbabilities;
-                    break;
-                case AnomalyVectorType.SentimentCategory:
-                    tree = GetTree(normal);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException("AnomalyVectorType");
-            }
-
-            VectorData vector = tree.CreateVector(normalization);
-            return vector;
         }
     }
 }
