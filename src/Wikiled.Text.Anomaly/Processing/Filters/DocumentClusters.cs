@@ -1,7 +1,7 @@
 ﻿using System;
 using Wikiled.Text.Analysis.Structure;
 
-namespace Wikiled.Text.Anomaly.Processing.Clustering
+namespace Wikiled.Text.Anomaly.Processing.Filters
 {
     public class DocumentClusters
     {

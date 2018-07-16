@@ -2,16 +2,12 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using NLog;
 using Wikiled.MachineLearning.Clustering;
 using Wikiled.MachineLearning.Mathematics.Vectors;
 using Wikiled.MachineLearning.Normalization;
-using Wikiled.Text.Analysis.NLP.NRC;
-using Wikiled.Text.Analysis.Reflection;
 using Wikiled.Text.Analysis.Reflection.Data;
 using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Style.Logic;
 
 namespace Wikiled.Text.Anomaly.Processing
 {

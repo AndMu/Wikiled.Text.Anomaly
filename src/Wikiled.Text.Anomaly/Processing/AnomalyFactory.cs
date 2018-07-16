@@ -19,7 +19,8 @@ namespace Wikiled.Text.Anomaly.Processing
 
         public IDocumentAnomalyDetector Create(Document document)
         {
-            return new DocumentAnomalyDetector(styleFactory, dictionary, document);
+            throw new NotImplementedException();
+            //return new DocumentAnomalyDetector(styleFactory, dictionary, document);
         }
     }
 }

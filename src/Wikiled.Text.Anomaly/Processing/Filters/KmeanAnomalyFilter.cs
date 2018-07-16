@@ -1,0 +1,80 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Accord.MachineLearning;
+using NLog;
+using Wikiled.MachineLearning.Normalization;
+
+namespace Wikiled.Text.Anomaly.Processing.Filters
+{
+    public class KmeanAnomalyFilter : IAnomalyFilter
+    {
+        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+
+        private readonly IDocumentVectorSource vectorSource;
+
+        public KmeanAnomalyFilter(IDocumentVectorSource vectorSource)
+        {
+            this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
+        }
+
+        public FilterTypes Type => FilterTypes.KMeans;
+
+        public TextCluster[] Filter(DocumentClusters document)
+        {
+            if (document.Clusters.Length < 3)
+            {
+                logger.Info("Not enought text clusters for clustering");
+                return document.Clusters;
+            }
+
+            List<double[]> observations = new List<double[]>();
+            foreach (var documentCluster in document.Clusters)
+            {
+                var result = vectorSource.GetVector(documentCluster.Block, NormalizationType.L2).Values;
+                observations.Add(result);
+            }
+          
+            var data = observations.ToArray();
+            var clusterNumber = document.Clusters.Length > 5 ? 5 : document.Clusters.Length;
+            KMeans kmeans = new KMeans(clusterNumber);
+            KMeansClusterCollection clusters = kmeans.Learn(data);
+            int[] labels = clusters.Decide(data);
+            Dictionary<int, int> occurences = new Dictionary<int, int>();
+            Dictionary<int, List<int>> occurenceIndexes = new Dictionary<int, List<int>>();
+            for (int i = 0; i < labels.Length; i++)
+            {
+                var label = labels[i];
+                occurences.TryGetValue(label, out var current);
+                current++;
+                occurences[label] = current;
+                if (!occurenceIndexes.TryGetValue(label, out var list))
+                {
+                    list = new List<int>();
+                    occurenceIndexes[label] = list;
+                }
+
+                list.Add(i);
+            }
+
+            if (occurences.Count == 1)
+            {
+                logger.Info("No anomaly found");
+                return document.Clusters;
+            }
+
+            var anomalyLabel = occurences.OrderBy(item => item.Value).First();
+            var exclude = occurenceIndexes[anomalyLabel.Key];
+            List<TextCluster> finalResult = new List<TextCluster>();
+            for (int i = 0; i < document.Clusters.Length; i++)
+            {
+                if (!exclude.Contains(i))
+                {
+                    finalResult.Add(document.Clusters[i]);
+                }
+            }
+
+            return finalResult.ToArray();
+        }
+    }
+}
