@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
 using Wikiled.MachineLearning.Clustering;
-using Wikiled.MachineLearning.Mathematics.Vectors;
 using Wikiled.MachineLearning.Normalization;
-using Wikiled.Text.Analysis.Reflection.Data;
 using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Anomaly.Processing.Filters;
 
 namespace Wikiled.Text.Anomaly.Processing
 {
@@ -15,45 +13,25 @@ namespace Wikiled.Text.Anomaly.Processing
     {
         private const int MovingAverage = 3;
 
-        private readonly CosineSimilarityDistance distanceLogic = new CosineSimilarityDistance();
-
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
         private readonly SentenceItem[] sentences;
 
-        private ILookup<SentenceItem, SentenceItem> anomalyLookup;
+        private IAnomalyFilterFactory factory;
 
-        private double anomalyThreshold;
-
-        private double windowSize;
-
-        public DocumentAnomalyDetector(Document document)
+        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, double windowSize = 0.1)
         {
-            Document = document;
+            Document = document ?? throw new ArgumentNullException(nameof(document));
+            this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             sentences = Document.Sentences.ToArray();
-            AnomalyThreshold = 0.1;
-            windowSize = 0.1;
+            WindowSize = windowSize;
         }
 
         public SentenceItem[] Anomaly { get; private set; }
 
-        public int AnomalySentencesCount => (int)Math.Ceiling(sentences.Length * AnomalyThreshold);
-
-        public double AnomalyThreshold
-        {
-            get => anomalyThreshold;
-            set
-            {
-                if (value <= 0 || value > 1)
-                {
-                    throw new ArgumentOutOfRangeException("AnomalyThreshold");
-                }
-
-                anomalyThreshold = value;
-            }
-        }
-
         public Document Document { get; }
+
+        public bool UseSentimentClusters { get; }
 
         public int MinimumSentencesCount => (int)Math.Ceiling(sentences.Length * WindowSize);
 
@@ -65,69 +43,54 @@ namespace Wikiled.Text.Anomaly.Processing
             }
         }
 
-        public bool UseSentimentClusters { get; set; }
+        public double WindowSize { get; }
 
-        public bool UseVector { get; set; }
-
-        public double WindowSize
+        public Document Detect(params FilterTypes[] types)
         {
-            get => windowSize;
-            set
-            {
-                if (value <= 0 || value > 1)
-                {
-                    throw new ArgumentOutOfRangeException("WindowSize");
-                }
-
-                windowSize = value;
-            }
-        }
-
-        public SentenceItem[] WithoutAnomaly { get; private set; }
-
-        public void Detect()
-        {
-            log.Debug("Detect");
-            if (sentences.Length <= 3)
-            {
-                log.Debug("Detect - text too short");
-                return;
-            }
-
-            var ratings = sentences.Select(item => item.CalculateSentiment())
-                                   .MovingAverage(3)
-                                   .ToArray();
-            ClusterRegion[] clusters = ClusterFlow.GetRegions(ratings, MovingAverage);
-
-            ConcurrentBag<IItemProbability<SentenceItem[]>> list = new ConcurrentBag<IItemProbability<SentenceItem[]>>();
-            IEnumerable<SentenceItem[]> sentenceClusters = UseSentimentClusters
-                                                               ? GetSentencesBlockForRegions(clusters)
-                                                               : GetSentencesBlock();
             throw new NotImplementedException();
+            //log.Debug("Detect");
+            //if (sentences.Length <= 3)
+            //{
+            //    log.Debug("Detect - text too short");
 
-            var processed = list.OrderBy(item => item.Probability);
-            Reset();
+            //    return;
+            //}
 
-            List<SentenceItem> excluding = new List<SentenceItem>();
-            foreach (var itemProbability in processed)
-            {
-                if (excluding.Distinct().Count() >= AnomalySentencesCount)
-                {
-                    break;
-                }
+            //var ratings = sentences.Select(item => item.CalculateSentiment().RawRating)
+            //                       .Select(item => item ?? 0)
+            //                       .MovingAverage(3)
+            //                       .ToArray();
+            //ClusterRegion[] clusters = ClusterFlow.GetRegions(ratings, MovingAverage);
 
-                excluding.AddRange(itemProbability.Data);
-            }
+            //ConcurrentBag<IItemProbability<SentenceItem[]>> list = new ConcurrentBag<IItemProbability<SentenceItem[]>>();
+            //IEnumerable<SentenceItem[]> sentenceClusters = UseSentimentClusters
+            //                                                   ? GetSentencesBlockForRegions(clusters)
+            //                                                   : GetSentencesBlock();
+            //throw new NotImplementedException();
 
-            if (excluding.Count > 0)
-            {
-                Anomaly = excluding.ToArray();
-                anomalyLookup = Anomaly.ToLookup(item => item);
-                WithoutAnomaly = sentences.Where(item => !anomalyLookup.Contains(item)).ToArray();
-            }
+            //var processed = list.OrderBy(item => item.Probability);
+            //Reset();
+
+            //List<SentenceItem> excluding = new List<SentenceItem>();
+            //foreach (var itemProbability in processed)
+            //{
+            //    if (excluding.Distinct().Count() >= AnomalySentencesCount)
+            //    {
+            //        break;
+            //    }
+
+            //    excluding.AddRange(itemProbability.Data);
+            //}
+
+            //if (excluding.Count > 0)
+            //{
+            //    Anomaly = excluding.ToArray();
+            //    anomalyLookup = Anomaly.ToLookup(item => item);
+            //    WithoutAnomaly = sentences.Where(item => !anomalyLookup.Contains(item)).ToArray();
+            //}
         }
 
-        public SentenceItem[] GetData(ClusterRegion region)
+        private SentenceItem[] GetData(ClusterRegion region)
         {
             int start = region.StartIndex == 0
                             ? 0
@@ -143,20 +106,7 @@ namespace Wikiled.Text.Anomaly.Processing
 
             return items.ToArray();
         }
-
-        
-        public bool IsInAnomaly(SentenceItem sentence)
-        {
-            return anomalyLookup != null && anomalyLookup.Contains(sentence);
-        }
-
-        public void Reset()
-        {
-            Anomaly = new SentenceItem[] { };
-            WithoutAnomaly = sentences;
-            anomalyLookup = null;
-        }
-
+    
         private IEnumerable<SentenceItem[]> GetSentencesBlock()
         {
             return sentences.WindowedEx(

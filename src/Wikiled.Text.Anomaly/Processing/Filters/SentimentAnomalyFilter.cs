@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
@@ -13,7 +12,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             List<TextCluster> clusters = new List<TextCluster>();
             foreach (var cluster in document.Clusters)
             {
-                if (cluster.Block.Any(item => item.CalculateSentiment().h > 0))
+                if (cluster.Block.Any(item => item.CalculateSentiment().HasValue))
                 {
                     clusters.Add(cluster);
                 }

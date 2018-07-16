@@ -3,7 +3,7 @@ using NLog;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
-    public class AnomalyFilterFactory
+    public class AnomalyFilterFactory : IAnomalyFilterFactory
     {
         private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
 
