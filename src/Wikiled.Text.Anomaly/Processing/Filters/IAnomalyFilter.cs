@@ -4,7 +4,6 @@
     {
         FilterTypes Type { get; }
 
-
-        TextCluster[] Filter(DocumentClusters document);
+        DetectionResults Filter(DocumentClusters document);
     }
 }

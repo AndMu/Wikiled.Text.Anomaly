@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using NLog;
+using Wikiled.Common.Utilities.Helpers;
 using Wikiled.MachineLearning.Clustering;
 using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
@@ -15,31 +16,34 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private static readonly Logger log = LogManager.GetCurrentClassLogger();
 
-        private readonly SentenceItem[] sentences;
+        private readonly IAnomalyFilterFactory factory;
 
-        private IAnomalyFilterFactory factory;
+        private readonly IDocumentReconstructor reconstructor;
 
-        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, double windowSize = 0.1)
+        private readonly List<TextCluster> anomaly = new List<TextCluster>();
+
+        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, bool useSentimentClusters = false, double windowSize = 0.1)
         {
             Document = document ?? throw new ArgumentNullException(nameof(document));
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
-            sentences = Document.Sentences.ToArray();
+            this.reconstructor = reconstructor ?? throw new ArgumentNullException(nameof(reconstructor));
+            UseSentimentClusters = useSentimentClusters;
             WindowSize = windowSize;
         }
 
-        public SentenceItem[] Anomaly { get; private set; }
+        public TextCluster[] Anomaly => anomaly.ToArray();
 
         public Document Document { get; }
 
         public bool UseSentimentClusters { get; }
 
-        public int MinimumSentencesCount => (int)Math.Ceiling(sentences.Length * WindowSize);
+        public int MinimumSentencesCount => (int)Math.Ceiling(Document.Sentences.Count * WindowSize);
 
         public double MinimumWordsCount
         {
             get
             {
-                return (int)Math.Ceiling(sentences.Sum(item => item.Words.Count) * WindowSize);
+                return (int)Math.Ceiling(Document.Sentences.Sum(item => item.Words.Count) * WindowSize);
             }
         }
 
@@ -47,47 +51,57 @@ namespace Wikiled.Text.Anomaly.Processing
 
         public Document Detect(params FilterTypes[] types)
         {
-            throw new NotImplementedException();
-            //log.Debug("Detect");
-            //if (sentences.Length <= 3)
-            //{
-            //    log.Debug("Detect - text too short");
+            if (types.Length == 0)
+            {
+                throw new ArgumentException("Value cannot be an empty collection.", nameof(types));
+            }
 
-            //    return;
-            //}
+            log.Debug("Detect");
+            anomaly.Clear();
+            if (Document.Sentences.Count <= 3)
+            {
+                log.Debug("Detect - text too short");
+                return Document;
+            }
 
-            //var ratings = sentences.Select(item => item.CalculateSentiment().RawRating)
-            //                       .Select(item => item ?? 0)
-            //                       .MovingAverage(3)
-            //                       .ToArray();
-            //ClusterRegion[] clusters = ClusterFlow.GetRegions(ratings, MovingAverage);
+            var ratings = Document.Sentences.Select(item => item.CalculateSentiment().RawRating)
+                                   .Select(item => item ?? 0)
+                                   .MovingAverage(3)
+                                   .ToArray();
+            
+            SentenceItem[][] sentenceClusters = null;
+            if (UseSentimentClusters)
+            {
+                ClusterRegion[] clusters = ClusterFlow.GetRegions(ratings, MovingAverage);
+                if (clusters.Length == 0)
+                {
+                    log.Info("Failed to create sentiment clusters");
+                }
+                else
+                {
+                    sentenceClusters = GetSentencesBlockForRegions(clusters).ToArray();
+                }
+            }
 
-            //ConcurrentBag<IItemProbability<SentenceItem[]>> list = new ConcurrentBag<IItemProbability<SentenceItem[]>>();
-            //IEnumerable<SentenceItem[]> sentenceClusters = UseSentimentClusters
-            //                                                   ? GetSentencesBlockForRegions(clusters)
-            //                                                   : GetSentencesBlock();
-            //throw new NotImplementedException();
+            if (sentenceClusters == null)
+            {
+                log.Info("Using sentence clustering");
+                sentenceClusters = GetSentencesBlock().ToArray();
+            }
+            
+            var document = Document;
+            var textClusters = sentenceClusters.Select(item => new TextCluster(item)).ToArray();
+            foreach (var filterTypese in types)
+            {
+                var current = document.CloneJson();
+                var result = factory.Create(filterTypese).Filter(new DocumentClusters(current, textClusters));
+                anomaly.AddRange(result.Anomaly);
+                var sentences = result.Result.SelectMany(item => item.Block).Distinct().ToArray();
+                textClusters = result.Result;
+                document = reconstructor.Reconstruct(sentences);
+            }
 
-            //var processed = list.OrderBy(item => item.Probability);
-            //Reset();
-
-            //List<SentenceItem> excluding = new List<SentenceItem>();
-            //foreach (var itemProbability in processed)
-            //{
-            //    if (excluding.Distinct().Count() >= AnomalySentencesCount)
-            //    {
-            //        break;
-            //    }
-
-            //    excluding.AddRange(itemProbability.Data);
-            //}
-
-            //if (excluding.Count > 0)
-            //{
-            //    Anomaly = excluding.ToArray();
-            //    anomalyLookup = Anomaly.ToLookup(item => item);
-            //    WithoutAnomaly = sentences.Where(item => !anomalyLookup.Contains(item)).ToArray();
-            //}
+            return document;
         }
 
         private SentenceItem[] GetData(ClusterRegion region)
@@ -96,12 +110,12 @@ namespace Wikiled.Text.Anomaly.Processing
                             ? 0
                             : region.StartIndex + MovingAverage / 2;
             int end = region.EndIndex + MovingAverage / 2;
-            end = end > sentences.Length - 1 ? sentences.Length - 1 : end;
+            end = end > Document.Sentences.Count - 1 ? Document.Sentences.Count - 1 : end;
 
             List<SentenceItem> items = new List<SentenceItem>();
             for (int i = start; i < end; i++)
             {
-                items.Add(sentences[i]);
+                items.Add(Document.Sentences[i]);
             }
 
             return items.ToArray();
@@ -109,7 +123,7 @@ namespace Wikiled.Text.Anomaly.Processing
     
         private IEnumerable<SentenceItem[]> GetSentencesBlock()
         {
-            return sentences.WindowedEx(
+            return Document.Sentences.WindowedEx(
                 MinimumSentencesCount,
                 data => data.Select(item => item.Words.Count).Sum() >= MinimumWordsCount);
         }

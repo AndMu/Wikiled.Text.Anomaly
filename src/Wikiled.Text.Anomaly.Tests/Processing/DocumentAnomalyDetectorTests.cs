@@ -1,7 +1,7 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing;
+using Wikiled.Text.Anomaly.Processing.Filters;
 
 namespace Wikiled.Text.Anomaly.Tests.Processing
 {
@@ -20,50 +20,74 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
         }
 
         [Test]
-        public void Measure()
+        public void AnomalyCosine()
         {
-            //var distances = instance.Create(document);
-            //distances.Detect();
-            //Assert.AreEqual(42, document.Sentences.Count);
-            //Assert.AreEqual(32, distances.WithoutAnomaly.Length);
-            //Assert.AreEqual(10, distances.Anomaly.Length);
-            throw new NotImplementedException();
-        }
-
-
-        [Test]
-        public void Anomaly()
-        {
-            //    var distances = instance.Create(document);
-            //    distances.Detect();
-            //    var anomaly = distances.Anomaly;
-            //    Assert.AreEqual("Permission to make digital or hard copies of part or all of this work for personal or", distances.Anomaly[0].Text);
-            //}
-            throw new NotImplementedException();
+            var distances = instance.CreateSimple(document);
+            var result = distances.Detect(FilterTypes.Cosine);
+            Assert.AreEqual(42, document.Sentences.Count);
+            Assert.AreEqual(32, result.Sentences.Count);
+            Assert.AreEqual(1, distances.Anomaly.Length);
+            Assert.AreEqual(10, distances.Anomaly[0].Block.Length);
+            Assert.AreEqual("Permission to make digital or hard copies of part or all of this work for personal or", distances.Anomaly[0].Block[0].Text);
         }
 
         [Test]
-        public void MinimumSentences()
+        public void AnomalyKMeans()
         {
-            //var distances = instance.Create(document);
-            //distances.Detect();
-            //Assert.AreEqual(5, distances.MinimumSentencesCount);
-            //distances.WindowSize = 0.01;
-            //Assert.AreEqual(1, distances.MinimumSentencesCount);
-            throw new NotImplementedException();
+            var distances = instance.CreateSimple(document);
+            var result = distances.Detect(FilterTypes.KMeans);
+            Assert.AreEqual(42, document.Sentences.Count);
+            Assert.AreEqual(32, result.Sentences.Count);
+            Assert.AreEqual(1, distances.Anomaly.Length);
+            Assert.AreEqual(10, distances.Anomaly[0].Block.Length);
+            Assert.AreEqual("Permission to make digital or hard copies of part or all of this work for personal or", distances.Anomaly[0].Block[0].Text);
         }
 
         [Test]
-        public void MinimumWords()
+        public void AnomalySentimentSmallSentiment()
         {
-            //var distances = instance.Create(document);
-            //distances.Detect();
-            //Assert.AreEqual(96, distances.MinimumWordsCount);
-            //distances.WindowSize = 0.01;
-            //Assert.AreEqual(10, distances.MinimumWordsCount);
-            //distances.WindowSize = 0.0001;
-            //Assert.AreEqual(1, distances.MinimumWordsCount);
-            throw new NotImplementedException();
+            var distances = instance.CreateSimple(document, true);
+            document.Sentences[0].Words[0].CalculatedValue = 1;
+            var result = distances.Detect(FilterTypes.Sentiment);
+            Assert.AreEqual(42, document.Sentences.Count);
+            Assert.AreEqual(1, result.Sentences.Count);
+        }
+
+        [Test]
+        public void AnomalySentiment()
+        {
+            var distances = instance.CreateSimple(document, true);
+            int sign = 2;
+            for (int i = 0; i < 20; i++)
+            {
+                if (i % 3 == 0)
+                {
+                    sign = -sign;
+                }
+
+                document.Sentences[i].Words[0].CalculatedValue = sign;
+            }
+            
+            var result = distances.Detect(FilterTypes.Sentiment);
+            Assert.AreEqual(42, document.Sentences.Count);
+            Assert.AreEqual(12, result.Sentences.Count);
+        }
+
+        [TestCase(0.1, 5)]
+        [TestCase(0.01, 1)]
+        public void MinimumSentences(double windowSize, int sentences)
+        {
+            var distances = instance.CreateSimple(document, false, windowSize);
+            Assert.AreEqual(sentences, distances.MinimumSentencesCount);
+        }
+
+        [TestCase(0.1, 96)]
+        [TestCase(0.01, 10)]
+        [TestCase(0.0001, 1)]
+        public void MinimumWords(double windowSize, int words)
+        {
+            var distances = instance.CreateSimple(document, false, windowSize);
+            Assert.AreEqual(words, distances.MinimumWordsCount);
         }
     }
 }

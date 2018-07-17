@@ -63,12 +63,13 @@ namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
             var result = instance.Filter(new DocumentClusters(document, clusters));
             if (isDifferent)
             {
-                Assert.AreEqual(3, result.Length);
-                Assert.IsFalse(result.Contains(clusters[3]));
+                Assert.AreEqual(3, result.Result.Length);
+                Assert.AreEqual(1, result.Anomaly.Length);
+                Assert.IsFalse(result.Result.Contains(clusters[3]));
             }
             else
             {
-                Assert.AreEqual(4, result.Length);
+                Assert.AreEqual(4, result.Result.Length);
             }
         }
 

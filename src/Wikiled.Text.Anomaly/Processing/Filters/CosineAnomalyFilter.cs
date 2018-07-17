@@ -24,7 +24,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
 
         public FilterTypes Type => FilterTypes.KMeans;
 
-        public TextCluster[] Filter(DocumentClusters document)
+        public DetectionResults Filter(DocumentClusters document)
         {
             if (document == null)
             {
@@ -82,7 +82,9 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                 logger.Info("Difference is too small. No anomaly detected");
             }
 
-            return sorted.Skip(anomalyCount).Select(item => item.Data).ToArray();
+            var anomaly = sorted.Take(anomalyCount).Select(item => item.Data).ToArray();
+            var result = sorted.Skip(anomalyCount).Select(item => item.Data).ToArray();
+            return new DetectionResults(anomaly, result);
         }
     }
 }

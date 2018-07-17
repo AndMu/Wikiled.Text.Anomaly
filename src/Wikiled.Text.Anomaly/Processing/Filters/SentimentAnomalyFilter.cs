@@ -7,18 +7,23 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
     {
         public FilterTypes Type => FilterTypes.Sentiment;
 
-        public TextCluster[] Filter(DocumentClusters document)
+        public DetectionResults Filter(DocumentClusters document)
         {
             List<TextCluster> clusters = new List<TextCluster>();
+            List<TextCluster> withoutSentiment = new List<TextCluster>();
             foreach (var cluster in document.Clusters)
             {
                 if (cluster.Block.Any(item => item.CalculateSentiment().HasValue))
                 {
                     clusters.Add(cluster);
                 }
+                else
+                {
+                    withoutSentiment.Add(cluster);
+                }
             }
 
-            return clusters.ToArray();
+            return new DetectionResults(withoutSentiment.ToArray(), clusters.ToArray());
         }
     }
 }

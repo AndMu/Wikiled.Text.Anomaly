@@ -20,12 +20,12 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
 
         public FilterTypes Type => FilterTypes.KMeans;
 
-        public TextCluster[] Filter(DocumentClusters document)
+        public DetectionResults Filter(DocumentClusters document)
         {
             if (document.Clusters.Length < 3)
             {
                 logger.Info("Not enought text clusters for clustering");
-                return document.Clusters;
+                return new DetectionResults(document.Clusters);
             }
 
             List<double[]> observations = new List<double[]>();
@@ -60,21 +60,26 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             if (occurences.Count == 1)
             {
                 logger.Info("No anomaly found");
-                return document.Clusters;
+                return new DetectionResults(document.Clusters);
             }
 
             var anomalyLabel = occurences.OrderBy(item => item.Value).First();
             var exclude = occurenceIndexes[anomalyLabel.Key];
             List<TextCluster> finalResult = new List<TextCluster>();
+            List<TextCluster> anomaly = new List<TextCluster>();
             for (int i = 0; i < document.Clusters.Length; i++)
             {
                 if (!exclude.Contains(i))
                 {
                     finalResult.Add(document.Clusters[i]);
                 }
+                else
+                {
+                    anomaly.Add(document.Clusters[i]);
+                }
             }
 
-            return finalResult.ToArray();
+            return new DetectionResults(anomaly.ToArray(), finalResult.ToArray());
         }
     }
 }
