@@ -15,8 +15,6 @@ namespace Wikiled.Text.Anomaly.Processing
 
         bool UseSentimentClusters { get; }
 
-        double WindowSize { get; }
-
         Document Detect(params FilterTypes[] types);
     }
 }

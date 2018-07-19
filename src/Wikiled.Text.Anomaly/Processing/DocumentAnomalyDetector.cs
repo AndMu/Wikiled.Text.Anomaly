@@ -22,13 +22,12 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private readonly List<TextCluster> anomaly = new List<TextCluster>();
 
-        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, bool useSentimentClusters = false, double windowSize = 0.1)
+        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, bool useSentimentClusters = false)
         {
             Document = document ?? throw new ArgumentNullException(nameof(document));
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.reconstructor = reconstructor ?? throw new ArgumentNullException(nameof(reconstructor));
             UseSentimentClusters = useSentimentClusters;
-            WindowSize = windowSize;
         }
 
         public TextCluster[] Anomaly => anomaly.ToArray();
@@ -37,17 +36,9 @@ namespace Wikiled.Text.Anomaly.Processing
 
         public bool UseSentimentClusters { get; }
 
-        public int MinimumSentencesCount => (int)Math.Ceiling(Document.Sentences.Count * WindowSize);
+        public int MinimumSentencesCount => 3;
 
-        public double MinimumWordsCount
-        {
-            get
-            {
-                return (int)Math.Ceiling(Document.Sentences.Sum(item => item.Words.Count) * WindowSize);
-            }
-        }
-
-        public double WindowSize { get; }
+        public double MinimumWordsCount => 50;
 
         public Document Detect(params FilterTypes[] types)
         {
@@ -58,7 +49,7 @@ namespace Wikiled.Text.Anomaly.Processing
 
             log.Debug("Detect");
             anomaly.Clear();
-            if (Document.Sentences.Count <= 3)
+            if (Document.Sentences.Count <= 2 * MinimumSentencesCount)
             {
                 log.Debug("Detect - text too short");
                 return Document;
@@ -91,10 +82,10 @@ namespace Wikiled.Text.Anomaly.Processing
             
             var document = Document;
             var textClusters = sentenceClusters.Select(item => new TextCluster(item)).ToArray();
-            foreach (var filterTypese in types)
+            foreach (var filterTypes in types)
             {
                 var current = document.CloneJson();
-                var result = factory.Create(filterTypese).Filter(new DocumentClusters(current, textClusters));
+                var result = factory.Create(filterTypes).Filter(new DocumentClusters(current, textClusters));
                 anomaly.AddRange(result.Anomaly);
                 var sentences = result.Result.SelectMany(item => item.Block).Distinct().ToArray();
                 textClusters = result.Result;

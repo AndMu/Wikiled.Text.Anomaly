@@ -18,13 +18,12 @@ namespace Wikiled.Text.Anomaly.Processing
             this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
         }
 
-        public IDocumentAnomalyDetector CreateSimple(Document document, bool useSentimentClusters = false, double windowSize = 0.1)
+        public IDocumentAnomalyDetector CreateSimple(Document document, bool useSentimentClusters = false)
         {
             return new DocumentAnomalyDetector(document,
                 new AnomalyFilterFactory(new DocumentVectorSource(styleFactory, dictionary, AnomalyVectorType.Full)),
                 new DocumentReconstructor(),
-                useSentimentClusters,
-                windowSize);
+                useSentimentClusters);
         }
     }
 }
