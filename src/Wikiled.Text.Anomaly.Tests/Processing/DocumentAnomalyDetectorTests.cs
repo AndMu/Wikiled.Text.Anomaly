@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.IO;
+using Newtonsoft.Json;
+using NUnit.Framework;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Processing.Filters;
@@ -44,6 +46,21 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
         }
 
         [Test]
+        public void AnomalyKMeansRealDoc()
+        {
+            var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
+            var source = new DocumentVectorSource(Global.StyleFactory, Global.Dictionary, AnomalyVectorType.Full);
+            //var original = document.Sentences.Select(item => source.GetVector(new []{ item }, NormalizationType.None));
+            //var l2 = document.Sentences.Select(item => source.GetVector(new[] { item }, NormalizationType.L2));
+            //new JsonVectorSerialization(@"c:\1\vector.json").Serialize(original);
+            //new JsonVectorSerialization(@"c:\1\vector_l2.json").Serialize(l2);
+            var distances = instance.CreateSimple(document);
+            var result = distances.Detect(FilterTypes.KMeans);
+            Assert.AreEqual(776, document.Sentences.Count);
+            Assert.AreEqual(329, result.Sentences.Count);
+        }
+
+        [Test]
         public void AnomalySentimentSmallSentiment()
         {
             var distances = instance.CreateSimple(document, true);
@@ -71,23 +88,6 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
             var result = distances.Detect(FilterTypes.Sentiment);
             Assert.AreEqual(42, document.Sentences.Count);
             Assert.AreEqual(12, result.Sentences.Count);
-        }
-
-        [TestCase(0.1, 5)]
-        [TestCase(0.01, 1)]
-        public void MinimumSentences(double windowSize, int sentences)
-        {
-            var distances = instance.CreateSimple(document, false, windowSize);
-            Assert.AreEqual(sentences, distances.MinimumSentencesCount);
-        }
-
-        [TestCase(0.1, 96)]
-        [TestCase(0.01, 10)]
-        [TestCase(0.0001, 1)]
-        public void MinimumWords(double windowSize, int words)
-        {
-            var distances = instance.CreateSimple(document, false, windowSize);
-            Assert.AreEqual(words, distances.MinimumWordsCount);
         }
     }
 }

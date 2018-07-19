@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Accord.MachineLearning;
 using NLog;
 using Wikiled.MachineLearning.Normalization;
@@ -28,12 +29,15 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                 return new DetectionResults(document.Clusters);
             }
 
-            List<double[]> observations = new List<double[]>();
-            foreach (var documentCluster in document.Clusters)
-            {
-                var result = vectorSource.GetVector(documentCluster.Block, NormalizationType.L2).Values;
-                observations.Add(result);
-            }
+            double[][] observations = new double[document.Clusters.Length][];
+            Parallel.For(0,
+                         document.Clusters.Length,
+                         i =>
+                         {
+                             var documentCluster = document.Clusters[i];
+                             var result = vectorSource.GetVector(documentCluster.Block, NormalizationType.L2).Values;
+                             observations[i] = result;
+                         });
           
             var data = observations.ToArray();
             var clusterNumber = document.Clusters.Length > 5 ? 5 : document.Clusters.Length;
