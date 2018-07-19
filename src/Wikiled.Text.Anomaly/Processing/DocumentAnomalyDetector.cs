@@ -22,12 +22,17 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private readonly List<TextCluster> anomaly = new List<TextCluster>();
 
-        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, bool useSentimentClusters = false)
+        public DocumentAnomalyDetector(Document document,
+                                       IAnomalyFilterFactory factory,
+                                       IDocumentReconstructor reconstructor,
+                                       bool useSentimentClusters = false,
+                                       int minimumSentences = 3)
         {
             Document = document ?? throw new ArgumentNullException(nameof(document));
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.reconstructor = reconstructor ?? throw new ArgumentNullException(nameof(reconstructor));
             UseSentimentClusters = useSentimentClusters;
+            MinimumSentencesCount = minimumSentences;
         }
 
         public TextCluster[] Anomaly => anomaly.ToArray();
@@ -36,9 +41,7 @@ namespace Wikiled.Text.Anomaly.Processing
 
         public bool UseSentimentClusters { get; }
 
-        public int MinimumSentencesCount => 3;
-
-        public double MinimumWordsCount => 50;
+        public int MinimumSentencesCount { get; }
 
         public Document Detect(params FilterTypes[] types)
         {
@@ -114,9 +117,7 @@ namespace Wikiled.Text.Anomaly.Processing
     
         private IEnumerable<SentenceItem[]> GetSentencesBlock()
         {
-            return Document.Sentences.WindowedEx(
-                MinimumSentencesCount,
-                data => data.Select(item => item.Words.Count).Sum() >= MinimumWordsCount);
+            return Document.Sentences.Windowed(MinimumSentencesCount);
         }
 
         private IEnumerable<SentenceItem[]> GetSentencesBlockForRegions(ClusterRegion[] regions)

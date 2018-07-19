@@ -4,6 +4,6 @@ namespace Wikiled.Text.Anomaly.Processing
 {
     public interface IAnomalyFactory
     {
-        IDocumentAnomalyDetector CreateSimple(Document document, bool useSentimentClusters = false);
+        IDocumentAnomalyDetector CreateSimple(Document document, bool useSentimentClusters = false, int minimumSentences = 3);
     }
 }

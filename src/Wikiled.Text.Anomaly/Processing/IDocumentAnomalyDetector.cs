@@ -11,8 +11,6 @@ namespace Wikiled.Text.Anomaly.Processing
 
         int MinimumSentencesCount { get; }
 
-        double MinimumWordsCount { get; }
-
         bool UseSentimentClusters { get; }
 
         Document Detect(params FilterTypes[] types);
