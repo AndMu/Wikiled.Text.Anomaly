@@ -35,7 +35,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                          i =>
                          {
                              var documentCluster = document.Clusters[i];
-                             var result = vectorSource.GetVector(documentCluster.Block, NormalizationType.L2).Values;
+                             var result = vectorSource.GetVector(documentCluster.Block, NormalizationType.L2).FullValues;
                              observations[i] = result;
                          });
           

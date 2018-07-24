@@ -1,6 +1,9 @@
 ﻿using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Wikiled.MachineLearning.Mathematics.Vectors.Serialization;
+using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Processing.Filters;
@@ -50,10 +53,10 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
         {
             var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
             var source = new DocumentVectorSource(Global.StyleFactory, Global.Dictionary, AnomalyVectorType.Full);
-            //var original = document.Sentences.Select(item => source.GetVector(new []{ item }, NormalizationType.None));
-            //var l2 = document.Sentences.Select(item => source.GetVector(new[] { item }, NormalizationType.L2));
-            //new JsonVectorSerialization(@"c:\1\vector.json").Serialize(original);
-            //new JsonVectorSerialization(@"c:\1\vector_l2.json").Serialize(l2);
+            var original = document.Sentences.Select(item => source.GetVector(new []{ item }, NormalizationType.None));
+            var l2 = document.Sentences.Select(item => source.GetVector(new[] { item }, NormalizationType.L2));
+            new JsonVectorSerialization(@"c:\1\vector.json", true).Serialize(original);
+            new FlatVectorSerialization(@"c:\1\vector.csv").Serialize(original);
             var distances = instance.CreateSimple(document);
             var result = distances.Detect(FilterTypes.KMeans);
             Assert.AreEqual(776, document.Sentences.Count);
