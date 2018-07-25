@@ -3,6 +3,12 @@ from sklearn import preprocessing
 import numpy as np
 from pyod.models.knn import KNN   # kNN detector
 from pyod.utils.data import evaluate_print
+import pandas as pd
+
+def moving_average(a, n=3) :
+    ret = np.cumsum(a, dtype=float)
+    ret[n:] = ret[n:] - ret[:-n]
+    return ret[n - 1:] / n
 
 if __name__ == "__main__":
     data = genfromtxt('c:/1/vector.csv', delimiter=',')
@@ -12,7 +18,9 @@ if __name__ == "__main__":
     # print(np.any(np.isnan(data)))
     # print(np.all(np.isfinite(data)))
     x_scaled = preprocessing.scale(data)
-
+    pd_data = pd.DataFrame(x_scaled)
+    pd_data.rolling(window=5).mean()
+    x_scaled = pd_data.iloc[5:-1].values
     clf_name = 'My'
     clf = KNN()
     clf.fit(x_scaled)
