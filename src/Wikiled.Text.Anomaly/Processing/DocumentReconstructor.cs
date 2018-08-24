@@ -19,8 +19,9 @@ namespace Wikiled.Text.Anomaly.Processing
             Document document = new Document();
             foreach (var sentenceItem in ordered)
             {
-                sentenceItem.Index = document.Sentences.Count;
+                var original = sentenceItem.Index;
                 document.Add(sentenceItem);
+                sentenceItem.Index = original;
             }
 
             return document;

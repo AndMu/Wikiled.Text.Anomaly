@@ -3,7 +3,6 @@
     public enum FilterTypes
     {
         Sentiment,
-        KMeans,
-        Cosine
+        Svm
     }
 }

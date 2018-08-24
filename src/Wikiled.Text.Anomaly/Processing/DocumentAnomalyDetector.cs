@@ -1,10 +1,10 @@
-﻿using System;
+﻿using NLog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using NLog;
+using MoreLinq.Extensions;
 using Wikiled.Common.Utilities.Helpers;
 using Wikiled.MachineLearning.Clustering;
-using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing.Filters;
 
@@ -22,12 +22,11 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private readonly List<TextCluster> anomaly = new List<TextCluster>();
 
-        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, bool useSentimentClusters = false, double windowSize = 0.1)
+        public DocumentAnomalyDetector(Document document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, int windowSize = 3)
         {
             Document = document ?? throw new ArgumentNullException(nameof(document));
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.reconstructor = reconstructor ?? throw new ArgumentNullException(nameof(reconstructor));
-            UseSentimentClusters = useSentimentClusters;
             WindowSize = windowSize;
         }
 
@@ -35,19 +34,7 @@ namespace Wikiled.Text.Anomaly.Processing
 
         public Document Document { get; }
 
-        public bool UseSentimentClusters { get; }
-
-        public int MinimumSentencesCount => (int)Math.Ceiling(Document.Sentences.Count * WindowSize);
-
-        public double MinimumWordsCount
-        {
-            get
-            {
-                return (int)Math.Ceiling(Document.Sentences.Sum(item => item.Words.Count) * WindowSize);
-            }
-        }
-
-        public double WindowSize { get; }
+        public int WindowSize { get; }
 
         public Document Detect(params FilterTypes[] types)
         {
@@ -64,39 +51,18 @@ namespace Wikiled.Text.Anomaly.Processing
                 return Document;
             }
 
-            var ratings = Document.Sentences.Select(item => item.CalculateSentiment().RawRating)
-                                   .Select(item => item ?? 0)
-                                   .MovingAverage(3)
-                                   .ToArray();
-            
             SentenceItem[][] sentenceClusters = null;
-            if (UseSentimentClusters)
-            {
-                ClusterRegion[] clusters = ClusterFlow.GetRegions(ratings, MovingAverage);
-                if (clusters.Length == 0)
-                {
-                    log.Info("Failed to create sentiment clusters");
-                }
-                else
-                {
-                    sentenceClusters = GetSentencesBlockForRegions(clusters).ToArray();
-                }
-            }
+            log.Info("Using sentence clustering");
+            sentenceClusters = GetSentencesBlock().ToArray();
 
-            if (sentenceClusters == null)
+            Document document = Document;
+            TextCluster[] textClusters = sentenceClusters.Select(item => new TextCluster(item)).ToArray();
+            foreach (FilterTypes filterTypese in types)
             {
-                log.Info("Using sentence clustering");
-                sentenceClusters = GetSentencesBlock().ToArray();
-            }
-            
-            var document = Document;
-            var textClusters = sentenceClusters.Select(item => new TextCluster(item)).ToArray();
-            foreach (var filterTypese in types)
-            {
-                var current = document.CloneJson();
-                var result = factory.Create(filterTypese).Filter(new DocumentClusters(current, textClusters));
+                Document current = document.CloneJson();
+                DetectionResults result = factory.Create(filterTypese).Filter(new DocumentClusters(current, textClusters));
                 anomaly.AddRange(result.Anomaly);
-                var sentences = result.Result.SelectMany(item => item.Block).Distinct().ToArray();
+                SentenceItem[] sentences = result.Result.SelectMany(item => item.Block).Distinct().ToArray();
                 textClusters = result.Result;
                 document = reconstructor.Reconstruct(sentences);
             }
@@ -120,12 +86,13 @@ namespace Wikiled.Text.Anomaly.Processing
 
             return items.ToArray();
         }
-    
+
         private IEnumerable<SentenceItem[]> GetSentencesBlock()
         {
-            return Document.Sentences.WindowedEx(
-                MinimumSentencesCount,
-                data => data.Select(item => item.Words.Count).Sum() >= MinimumWordsCount);
+            foreach (var next in Document.Sentences.Window(WindowSize))
+            {
+                yield return next.ToArray();
+            }
         }
 
         private IEnumerable<SentenceItem[]> GetSentencesBlockForRegions(ClusterRegion[] regions)

@@ -1,12 +1,16 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Wikiled.MachineLearning.Mathematics.Vectors.Serialization;
+using Wikiled.MachineLearning.Mathematics.Vectors;
 using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Word2Vec;
 using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Processing.Filters;
+using Wikiled.Text.Anomaly.Processing.Specific;
+using Wikiled.Text.Anomaly.Processing.Vectors;
 
 namespace Wikiled.Text.Anomaly.Tests.Processing
 {
@@ -21,46 +25,37 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
         public void Setup()
         {
             document = Global.InitDocument("cv002_17424.txt");
-            instance = new AnomalyFactory(Global.StyleFactory, Global.Dictionary);
+            instance = new AnomalyFactory(new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin"))));
         }
 
         [Test]
-        public void AnomalyCosine()
+        public void AnomalySvm()
         {
+            var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
             var distances = instance.CreateSimple(document);
-            var result = distances.Detect(FilterTypes.Cosine);
-            Assert.AreEqual(42, document.Sentences.Count);
-            Assert.AreEqual(32, result.Sentences.Count);
-            Assert.AreEqual(1, distances.Anomaly.Length);
-            Assert.AreEqual(10, distances.Anomaly[0].Block.Length);
-            Assert.AreEqual("Permission to make digital or hard copies of part or all of this work for personal or", distances.Anomaly[0].Block[0].Text);
+            var result = distances.Detect(FilterTypes.Svm);
+            Assert.AreEqual(776, document.Sentences.Count);
+            Assert.AreEqual(156, result.Sentences.Count);
+            Assert.AreEqual(30, distances.Anomaly.Length);
+            Assert.AreEqual(14, distances.Anomaly[0].Block.Length);
+            Assert.AreEqual("vanguard research december 2017 vanguard economic", distances.Anomaly[0].Block[0].Text.Substring(0, 49));
         }
 
         [Test]
-        public void AnomalyKMeans()
-        {
-            var distances = instance.CreateSimple(document);
-            var result = distances.Detect(FilterTypes.KMeans);
-            Assert.AreEqual(42, document.Sentences.Count);
-            Assert.AreEqual(32, result.Sentences.Count);
-            Assert.AreEqual(1, distances.Anomaly.Length);
-            Assert.AreEqual(10, distances.Anomaly[0].Block.Length);
-            Assert.AreEqual("Permission to make digital or hard copies of part or all of this work for personal or", distances.Anomaly[0].Block[0].Text);
-        }
-
-        [Test]
-        public void AnomalyKMeansRealDoc()
+        public void AnomalySvmRealDoc()
         {
             var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
             var source = new DocumentVectorSource(Global.StyleFactory, Global.Dictionary, AnomalyVectorType.Full);
-            var original = document.Sentences.Select(item => source.GetVector(new []{ item }, NormalizationType.None));
-            var l2 = document.Sentences.Select(item => source.GetVector(new[] { item }, NormalizationType.L2));
-            new JsonVectorSerialization(@"c:\1\vector.json", true).Serialize(original);
-            new FlatVectorSerialization(@"c:\1\vector.csv").Serialize(original);
+            List<VectorData> vectors = new List<VectorData>();
+            for (int i = 0; i < document.Sentences.Count - 5; i++)
+            {
+                vectors.Add(source.GetVector(new Paragraph(document.Sentences.Skip(i).Take(5).ToArray()), NormalizationType.None));
+            }
+            
             var distances = instance.CreateSimple(document);
-            var result = distances.Detect(FilterTypes.KMeans);
+            var result = distances.Detect(FilterTypes.Svm);
             Assert.AreEqual(776, document.Sentences.Count);
-            Assert.AreEqual(329, result.Sentences.Count);
+            Assert.AreEqual(156, result.Sentences.Count);
         }
 
         [Test]
@@ -77,20 +72,24 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
         public void AnomalySentiment()
         {
             var distances = instance.CreateSimple(document, true);
-            int sign = 2;
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 12; i++)
             {
-                if (i % 3 == 0)
-                {
-                    sign = -sign;
-                }
-
-                document.Sentences[i].Words[0].CalculatedValue = sign;
+                document.Sentences[i].Words[0].CalculatedValue = 2;
             }
             
             var result = distances.Detect(FilterTypes.Sentiment);
             Assert.AreEqual(42, document.Sentences.Count);
             Assert.AreEqual(12, result.Sentences.Count);
+        }
+
+        [Test]
+        public void AnomalySentimentDocument()
+        {
+            var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
+            var distances = instance.CreateSimple(document, true);
+            var result = distances.Detect(FilterTypes.Sentiment, FilterTypes.Svm);
+            Assert.AreEqual(776, document.Sentences.Count);
+            Assert.AreEqual(72, result.Sentences.Count);
         }
     }
 }

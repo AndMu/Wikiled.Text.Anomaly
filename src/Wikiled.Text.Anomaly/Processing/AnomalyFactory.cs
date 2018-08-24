@@ -1,29 +1,25 @@
 ﻿using System;
-using Wikiled.Text.Analysis.NLP.NRC;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing.Filters;
-using Wikiled.Text.Style.Logic;
+using Wikiled.Text.Anomaly.Processing.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing
 {
     public class AnomalyFactory : IAnomalyFactory
     {
-        private readonly IStyleFactory styleFactory;
+        private readonly IDocumentVectorSource documentVector;
 
-        private readonly INRCDictionary dictionary;
-
-        public AnomalyFactory(IStyleFactory styleFactory, INRCDictionary dictionary)
+        public AnomalyFactory(IDocumentVectorSource documentVector)
         {
-            this.styleFactory = styleFactory ?? throw new ArgumentNullException(nameof(styleFactory));
-            this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
+            this.documentVector = documentVector ?? throw new ArgumentNullException(nameof(documentVector));
         }
 
-        public IDocumentAnomalyDetector CreateSimple(Document document, bool useSentimentClusters = false, double windowSize = 0.1)
+        public IDocumentAnomalyDetector CreateSimple(Document document, bool useSentimentClusters = false, int windowSize = 3)
         {
-            return new DocumentAnomalyDetector(document,
-                new AnomalyFilterFactory(new DocumentVectorSource(styleFactory, dictionary, AnomalyVectorType.Full)),
+            return new DocumentAnomalyDetector(
+                document,
+                new AnomalyFilterFactory(documentVector),
                 new DocumentReconstructor(),
-                useSentimentClusters,
                 windowSize);
         }
     }

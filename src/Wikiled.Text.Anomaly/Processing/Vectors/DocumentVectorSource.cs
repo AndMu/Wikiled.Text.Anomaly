@@ -7,9 +7,10 @@ using Wikiled.Text.Analysis.NLP.NRC;
 using Wikiled.Text.Analysis.Reflection;
 using Wikiled.Text.Analysis.Reflection.Data;
 using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Anomaly.Processing.Specific;
 using Wikiled.Text.Style.Logic;
 
-namespace Wikiled.Text.Anomaly.Processing
+namespace Wikiled.Text.Anomaly.Processing.Vectors
 {
     public class DocumentVectorSource : IDocumentVectorSource
     {
@@ -19,25 +20,20 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private readonly INRCDictionary dictionary;
 
+        private readonly AnomalyVectorType anomalyVectorType;
+
         public DocumentVectorSource(IStyleFactory styleFactory, INRCDictionary dictionary, AnomalyVectorType anomalyVectorType)
         {
             this.styleFactory = styleFactory ?? throw new ArgumentNullException(nameof(styleFactory));
             this.dictionary = dictionary ?? throw new ArgumentNullException(nameof(dictionary));
-            AnomalyVectorType = anomalyVectorType;
+            this.anomalyVectorType = anomalyVectorType;
         }
 
-        public AnomalyVectorType AnomalyVectorType { get; }
-
-        public VectorData GetDocumentVector(Document document, NormalizationType normalization)
+        public VectorData GetVector(IProcessingTextBlock normalBlock, NormalizationType normalization)
         {
-            return GetVector(document.Sentences, normalization);
-        }
-
-        public VectorData GetVector(IEnumerable<SentenceItem> normalBlock, NormalizationType normalization)
-        {
-            var normal = styleFactory.ConstructTextBlock(normalBlock.ToArray());
+            var normal = styleFactory.ConstructTextBlock(normalBlock.Sentences);
             DataTree tree;
-            switch (AnomalyVectorType)
+            switch (anomalyVectorType)
             {
                 case AnomalyVectorType.Full:
                     tree = new DataTree(normal, MapFull);

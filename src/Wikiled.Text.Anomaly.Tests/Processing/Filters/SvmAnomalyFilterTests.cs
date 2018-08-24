@@ -7,15 +7,17 @@ using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Processing.Filters;
+using Wikiled.Text.Anomaly.Processing.Specific;
+using Wikiled.Text.Anomaly.Processing.Vectors;
 
 namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
 {
     [TestFixture]
-    public class KmeanAnomalyFilterTests
+    public class SvmAnomalyFilterTests
     {
         private Mock<IDocumentVectorSource> mockDocumentVectorSource;
 
-        private KmeanAnomalyFilter instance;
+        private SvmAnomalyFilter instance;
 
         [SetUp]
         public void SetUp()
@@ -51,12 +53,10 @@ namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
                     wordVector = new VectorDataFactory().CreateSimple(0.5, 0, 0);
                 }
 
-                mockDocumentVectorSource.Setup(item =>
-                        item.GetVector(new[] { current }, NormalizationType.L2))
+                mockDocumentVectorSource.Setup(item => item.GetVector(new Paragraph(new[] { current }), NormalizationType.L2))
                     .Returns(wordVector);
 
-                mockDocumentVectorSource.Setup(item =>
-                        item.GetVector(other, NormalizationType.L2))
+                mockDocumentVectorSource.Setup(item => item.GetVector(new Paragraph(other), NormalizationType.L2))
                     .Returns(vector);
             }
 
@@ -76,12 +76,12 @@ namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
         [Test]
         public void Construct()
         {
-            Assert.Throws<ArgumentNullException>(() => new KmeanAnomalyFilter(null));
+            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyFilter(null));
         }
 
-        private KmeanAnomalyFilter CreateInstance()
+        private SvmAnomalyFilter CreateInstance()
         {
-            return new KmeanAnomalyFilter(mockDocumentVectorSource.Object);
+            return new SvmAnomalyFilter(mockDocumentVectorSource.Object);
         }
     }
 }

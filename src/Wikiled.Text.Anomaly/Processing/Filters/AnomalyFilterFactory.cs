@@ -1,5 +1,6 @@
 ﻿using System;
 using NLog;
+using Wikiled.Text.Anomaly.Processing.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
@@ -21,10 +22,8 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             {
                 case FilterTypes.Sentiment:
                     return new SentimentAnomalyFilter();
-                case FilterTypes.KMeans:
-                    return new KmeanAnomalyFilter(vectorSource);
-                case FilterTypes.Cosine:
-                    return new CosineAnomalyFilter(vectorSource);
+                case FilterTypes.Svm:
+                    return new SvmAnomalyFilter(vectorSource);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }

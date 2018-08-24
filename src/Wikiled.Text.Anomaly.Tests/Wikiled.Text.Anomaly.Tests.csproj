@@ -7,12 +7,12 @@
 
   <ItemGroup>    
     <PackageReference Include="Moq" Version="4.9.0" />
-    <PackageReference Include="NLog" version="4.5.7" />
+    <PackageReference Include="NLog" version="4.5.8" />
     <PackageReference Include="NUnit" version="3.10.1" />
-    <PackageReference Include="Wikiled.MachineLearning" Version="2.2.6" />
-    <PackageReference Include="Wikiled.Text.Analysis" Version="1.6.17" />
+    <PackageReference Include="Wikiled.MachineLearning" Version="2.2.8" />
+    <PackageReference Include="Wikiled.Text.Analysis" Version="1.6.23" />
     <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.9" />
-    <PackageReference Include="Wikiled.Text.Style" Version="1.0.4" />
+    <PackageReference Include="Wikiled.Text.Style" Version="1.0.12" />
     <packagereference Include="Microsoft.NET.Test.Sdk" Version="15.8.0"></packagereference>
     <packagereference Include="NUnit3TestAdapter" Version="3.10.0" />
 
@@ -27,6 +27,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Data\doc.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\model.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
