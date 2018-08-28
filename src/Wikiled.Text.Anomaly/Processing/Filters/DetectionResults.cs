@@ -1,28 +1,29 @@
 ﻿using System;
 using System.Linq;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
     public class DetectionResults
     {
-        public DetectionResults(TextCluster[] result)
-            : this(new TextCluster[] { }, result)
+        public DetectionResults(ProcessingTextBlock[] result)
+            : this(new ProcessingTextBlock[] { }, result)
         {
         }
 
-        public DetectionResults(TextCluster[] anomaly, TextCluster[] result)
+        public DetectionResults(ProcessingTextBlock[] anomaly, ProcessingTextBlock[] result)
         {
             Anomaly = anomaly ?? throw new ArgumentNullException(nameof(anomaly));
             Result = result ?? throw new ArgumentNullException(nameof(result));
-            var anomalyLookup = Anomaly.SelectMany(item => item.Block).ToLookup(item => item);
+            var anomalyLookup = Anomaly.SelectMany(item => item.Sentences).ToLookup(item => item);
             for (int i = 0; i < Result.Length; i++)
             {
-                Result[i] = new TextCluster(Result[i].Block.Where(item => !anomalyLookup.Contains(item)).ToArray());
+                Result[i] = new ProcessingTextBlock(Result[i].Sentences.Where(item => !anomalyLookup.Contains(item)).ToArray());
             }
         }
 
-        public TextCluster[] Anomaly { get; }
+        public ProcessingTextBlock[] Anomaly { get; }
 
-        public TextCluster[] Result { get; }
+        public ProcessingTextBlock[] Result { get; }
     }
 }

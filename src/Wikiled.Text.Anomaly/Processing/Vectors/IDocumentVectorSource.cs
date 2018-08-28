@@ -1,6 +1,7 @@
 ﻿using Wikiled.MachineLearning.Mathematics.Vectors;
 using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Anomaly.Processing.Specific;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Processing.Vectors
 {

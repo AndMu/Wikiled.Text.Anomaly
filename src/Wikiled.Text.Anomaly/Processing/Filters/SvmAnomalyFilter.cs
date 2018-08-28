@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
 using NLog;
@@ -10,6 +9,7 @@ using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing.Specific;
 using Wikiled.Text.Anomaly.Processing.Vectors;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
@@ -34,16 +34,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                 return new DetectionResults(document.Clusters);
             }
 
-            double[][] observations = new double[document.Clusters.Length][];
-
-            Parallel.For(0,
-                         document.Clusters.Length,
-                         i =>
-                         {
-                             var documentCluster = document.Clusters[i];
-                             var result = vectorSource.GetVector(new Paragraph(documentCluster.Block), NormalizationType.None).FullValues;
-                             observations[i] = result;
-                         });
+            double[][] observations = vectorSource.GetVectors(document.Clusters, NormalizationType.None);
 
             var standardizer = Standardizer.GetNumericStandardizer(observations);
             observations = standardizer.StandardizeAll(observations);
@@ -73,7 +64,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             Dictionary<int, List<double>> weights = new Dictionary<int, List<double>>();
             for (int i = 0; i < prediction.Length; i++)
             {
-                foreach (var sentenceItem in document.Clusters[i].Block)
+                foreach (var sentenceItem in document.Clusters[i].Sentences)
                 {
                     if (!weights.TryGetValue(sentenceItem.Index, out var classType))
                     {
@@ -85,21 +76,21 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                 }
             }
 
-            List<TextCluster> anomaly = new List<TextCluster>();
-            List<TextCluster> resultData = new List<TextCluster>();
+            List<ProcessingTextBlock> anomaly = new List<ProcessingTextBlock>();
+            List<ProcessingTextBlock> resultData = new List<ProcessingTextBlock>();
             List<SentenceItem> sentences = new List<SentenceItem>();
-            TextCluster cluster;
+            ProcessingTextBlock cluster;
             bool? lastResult = null;
             var cutoffIndex = (int)(weights.Count * 0.2);
             var cutoff = weights.Select(item => item.Value.Sum()).OrderBy(item => item).Skip(cutoffIndex).First();
-            foreach (var sentence in document.Document.Sentences)
+            foreach (var sentence in document.Clusters.SelectMany(item => item.Sentences).OrderBy(item => item.Index))
             {
                 var current = weights[sentence.Index].Sum();
                 var result = current > cutoff;
                 if (lastResult != null &&
                     result != lastResult)
                 {
-                    cluster = new TextCluster(sentences.ToArray());
+                    cluster = new ProcessingTextBlock(sentences.ToArray());
                     sentences.Clear();
                     if (lastResult.Value)
                     {
@@ -116,7 +107,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             }
 
 
-            cluster = new TextCluster(sentences.ToArray());
+            cluster = new ProcessingTextBlock(sentences.ToArray());
             sentences.Clear();
             if (lastResult.Value)
             {
@@ -130,7 +121,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             StringBuilder builder = new StringBuilder();
             foreach (var textCluster in anomaly)
             {
-                foreach (var sentenceItem in textCluster.Block)
+                foreach (var sentenceItem in textCluster.Sentences)
                 {
                     builder.AppendLine(sentenceItem.Text);
                 }

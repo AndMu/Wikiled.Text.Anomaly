@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
@@ -9,11 +10,11 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
 
         public DetectionResults Filter(DocumentClusters document)
         {
-            List<TextCluster> clusters = new List<TextCluster>();
-            List<TextCluster> withoutSentiment = new List<TextCluster>();
+            List<ProcessingTextBlock> clusters = new List<ProcessingTextBlock>();
+            List<ProcessingTextBlock> withoutSentiment = new List<ProcessingTextBlock>();
             foreach (var cluster in document.Clusters)
             {
-                if (cluster.Block.Any(item => item.CalculateSentiment().HasValue))
+                if (cluster.Sentences.Any(item => item.CalculateSentiment().HasValue))
                 {
                     clusters.Add(cluster);
                 }

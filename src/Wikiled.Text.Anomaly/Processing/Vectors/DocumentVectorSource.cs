@@ -8,6 +8,7 @@ using Wikiled.Text.Analysis.Reflection;
 using Wikiled.Text.Analysis.Reflection.Data;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing.Specific;
+using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Style.Logic;
 
 namespace Wikiled.Text.Anomaly.Processing.Vectors

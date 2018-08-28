@@ -11,6 +11,7 @@ using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Processing.Filters;
 using Wikiled.Text.Anomaly.Processing.Specific;
 using Wikiled.Text.Anomaly.Processing.Vectors;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Tests.Processing
 {
@@ -19,77 +20,77 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
     {
         private AnomalyFactory instance;
 
-        private Document document;
+        private DocumentBlock document;
 
         [SetUp]
         public void Setup()
         {
-            document = Global.InitDocument("cv002_17424.txt");
+            document = new DocumentBlock(Global.InitDocument("cv002_17424.txt"));
             instance = new AnomalyFactory(new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin"))));
         }
 
         [Test]
         public void AnomalySvm()
         {
-            var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
+            document = new DocumentBlock(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
             var distances = instance.CreateSimple(document);
             var result = distances.Detect(FilterTypes.Svm);
-            Assert.AreEqual(776, document.Sentences.Count);
-            Assert.AreEqual(156, result.Sentences.Count);
-            Assert.AreEqual(30, distances.Anomaly.Length);
-            Assert.AreEqual(14, distances.Anomaly[0].Block.Length);
-            Assert.AreEqual("vanguard research december 2017 vanguard economic", distances.Anomaly[0].Block[0].Text.Substring(0, 49));
+            Assert.AreEqual(776, document.Sentences.Length);
+            Assert.AreEqual(156, result.Document.Sentences.Count);
+            Assert.AreEqual(30, result.Anomaly.Length);
+            Assert.AreEqual(14, result.Anomaly[0].Sentences.Length);
+            Assert.AreEqual("vanguard research december 2017 vanguard economic", result.Anomaly[0].Sentences[0].Text.Substring(0, 49));
         }
 
         [Test]
         public void AnomalySvmRealDoc()
         {
-            var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
+            document = new DocumentBlock(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
             var source = new DocumentVectorSource(Global.StyleFactory, Global.Dictionary, AnomalyVectorType.Full);
             List<VectorData> vectors = new List<VectorData>();
-            for (int i = 0; i < document.Sentences.Count - 5; i++)
+            for (int i = 0; i < document.Sentences.Length - 5; i++)
             {
-                vectors.Add(source.GetVector(new Paragraph(document.Sentences.Skip(i).Take(5).ToArray()), NormalizationType.None));
+                vectors.Add(source.GetVector(new ProcessingTextBlock(document.Sentences.Skip(i).Take(5).ToArray()), NormalizationType.None));
             }
             
             var distances = instance.CreateSimple(document);
             var result = distances.Detect(FilterTypes.Svm);
-            Assert.AreEqual(776, document.Sentences.Count);
-            Assert.AreEqual(156, result.Sentences.Count);
+            Assert.AreEqual(776, document.Sentences.Length);
+            Assert.AreEqual(156, result.Document.Sentences.Count);
         }
 
         [Test]
         public void AnomalySentimentSmallSentiment()
         {
-            var distances = instance.CreateSimple(document, true);
+            var distances = instance.CreateSimple(document);
             document.Sentences[0].Words[0].CalculatedValue = 1;
             var result = distances.Detect(FilterTypes.Sentiment);
-            Assert.AreEqual(42, document.Sentences.Count);
-            Assert.AreEqual(1, result.Sentences.Count);
+            Assert.AreEqual(42, document.Sentences.Length);
+            Assert.AreEqual(1, result.Document.Sentences.Count);
         }
 
         [Test]
         public void AnomalySentiment()
         {
-            var distances = instance.CreateSimple(document, true);
+            var distances = instance.CreateSimple(document);
             for (int i = 0; i < 12; i++)
             {
                 document.Sentences[i].Words[0].CalculatedValue = 2;
             }
             
             var result = distances.Detect(FilterTypes.Sentiment);
-            Assert.AreEqual(42, document.Sentences.Count);
-            Assert.AreEqual(12, result.Sentences.Count);
+            Assert.AreEqual(42, document.Sentences.Length);
+            Assert.AreEqual(12, result.Document.Sentences.Count);
         }
 
         [Test]
         public void AnomalySentimentDocument()
         {
-            var document = JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "doc.json")));
-            var distances = instance.CreateSimple(document, true);
+            document = new DocumentBlock(JsonConvert.DeserializeObject<Document>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
+            var distances = instance.CreateSimple(document);
             var result = distances.Detect(FilterTypes.Sentiment, FilterTypes.Svm);
-            Assert.AreEqual(776, document.Sentences.Count);
-            Assert.AreEqual(72, result.Sentences.Count);
+            Assert.AreEqual(776, document.Sentences.Length);
+            Assert.AreEqual(72, result.Document.Sentences.Count);
         }
     }
 }

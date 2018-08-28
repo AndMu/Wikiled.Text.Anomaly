@@ -1,4 +1,6 @@
-﻿namespace Wikiled.Text.Anomaly.Processing.Filters
+﻿using Wikiled.Text.Anomaly.Structure;
+
+namespace Wikiled.Text.Anomaly.Processing.Filters
 {
     public interface IAnomalyFilter
     {

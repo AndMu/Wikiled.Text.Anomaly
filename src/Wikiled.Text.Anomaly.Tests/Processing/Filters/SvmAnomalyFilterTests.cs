@@ -5,10 +5,9 @@ using NUnit.Framework;
 using Wikiled.MachineLearning.Mathematics.Vectors;
 using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Processing.Filters;
-using Wikiled.Text.Anomaly.Processing.Specific;
 using Wikiled.Text.Anomaly.Processing.Vectors;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
 {
@@ -35,11 +34,11 @@ namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
             document.Sentences.Add(new SentenceItem("Two"));
             document.Sentences.Add(new SentenceItem("Three"));
             document.Sentences.Add(new SentenceItem("Four"));
-            TextCluster[] clusters = {
-                new TextCluster(document.Sentences[0]),
-                new TextCluster(document.Sentences[1]),
-                new TextCluster(document.Sentences[2]),
-                new TextCluster(document.Sentences[3])
+            ProcessingTextBlock[] clusters = {
+                new ProcessingTextBlock(document.Sentences[0]),
+                new ProcessingTextBlock(document.Sentences[1]),
+                new ProcessingTextBlock(document.Sentences[2]),
+                new ProcessingTextBlock(document.Sentences[3])
             };
 
             var vector = new VectorDataFactory().CreateSimple(1, 0, 1);
@@ -53,14 +52,14 @@ namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
                     wordVector = new VectorDataFactory().CreateSimple(0.5, 0, 0);
                 }
 
-                mockDocumentVectorSource.Setup(item => item.GetVector(new Paragraph(new[] { current }), NormalizationType.L2))
+                mockDocumentVectorSource.Setup(item => item.GetVector(new ProcessingTextBlock(new[] { current }), NormalizationType.L2))
                     .Returns(wordVector);
 
-                mockDocumentVectorSource.Setup(item => item.GetVector(new Paragraph(other), NormalizationType.L2))
+                mockDocumentVectorSource.Setup(item => item.GetVector(new ProcessingTextBlock(other), NormalizationType.L2))
                     .Returns(vector);
             }
 
-            var result = instance.Filter(new DocumentClusters(document, clusters));
+            var result = instance.Filter(new DocumentClusters(clusters));
             if (isDifferent)
             {
                 Assert.AreEqual(3, result.Result.Length);

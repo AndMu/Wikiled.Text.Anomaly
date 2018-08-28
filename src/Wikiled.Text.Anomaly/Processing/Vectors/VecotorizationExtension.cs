@@ -1,0 +1,29 @@
+﻿using System;
+using System.Threading.Tasks;
+using Wikiled.MachineLearning.Normalization;
+using Wikiled.Text.Anomaly.Processing.Specific;
+using Wikiled.Text.Anomaly.Structure;
+
+namespace Wikiled.Text.Anomaly.Processing.Vectors
+{
+    public static class VecotorizationExtension
+    {
+        public static double[][] GetVectors(this IDocumentVectorSource source, IProcessingTextBlock[] blocks, NormalizationType normalization)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (blocks == null) throw new ArgumentNullException(nameof(blocks));
+
+            double[][] observations = new double[blocks.Length][];
+
+            Parallel.For(0,
+                blocks.Length,
+                i =>
+                {
+                    var result = source.GetVector(blocks[i], NormalizationType.None).FullValues;
+                    observations[i] = result;
+                });
+
+            return observations;
+        }
+    }
+}
