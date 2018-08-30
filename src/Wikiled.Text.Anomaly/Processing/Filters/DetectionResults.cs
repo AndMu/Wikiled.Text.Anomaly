@@ -11,7 +11,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
         {
         }
 
-        public DetectionResults(ProcessingTextBlock[] anomaly, ProcessingTextBlock[] result)
+        public DetectionResults(ProcessingTextBlock[] result, ProcessingTextBlock[] anomaly)
         {
             Anomaly = anomaly ?? throw new ArgumentNullException(nameof(anomaly));
             Result = result ?? throw new ArgumentNullException(nameof(result));

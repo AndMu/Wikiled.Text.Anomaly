@@ -35,7 +35,6 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             }
 
             double[][] observations = vectorSource.GetVectors(document.Clusters, NormalizationType.None);
-
             var standardizer = Standardizer.GetNumericStandardizer(observations);
             observations = standardizer.StandardizeAll(observations);
             var data = observations.ToArray();
@@ -83,7 +82,16 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             bool? lastResult = null;
             var cutoffIndex = (int)(weights.Count * 0.2);
             var cutoff = weights.Select(item => item.Value.Sum()).OrderBy(item => item).Skip(cutoffIndex).First();
-            foreach (var sentence in document.Clusters.SelectMany(item => item.Sentences).OrderBy(item => item.Index))
+            var allSentences = document.Clusters.SelectMany(item => item.Sentences)
+                .Distinct()
+                .OrderBy(item => item.Index)
+                .ToArray();
+            if (allSentences.Length != weights.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(document), "Sentence length mismatch");
+            }
+
+            foreach (var sentence in allSentences)
             {
                 var current = weights[sentence.Index].Sum();
                 var result = current > cutoff;
@@ -105,7 +113,6 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                 sentences.Add(sentence);
                 lastResult = result;
             }
-
 
             cluster = new ProcessingTextBlock(sentences.ToArray());
             sentences.Clear();

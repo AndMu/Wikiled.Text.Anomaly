@@ -1,13 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Accord.MachineLearning;
+﻿using Accord.MachineLearning;
 using Accord.MachineLearning.Performance;
 using Accord.MachineLearning.VectorMachines;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Math.Optimization.Losses;
 using Accord.Statistics.Kernels;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Accord.IO;
+using Wikiled.MachineLearning.Mathematics;
 using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Anomaly.Processing.Vectors;
 using Wikiled.Text.Anomaly.Structure;
@@ -23,24 +26,49 @@ namespace Wikiled.Text.Anomaly.Processing.Specific
 
         private readonly IDocumentVectorSource vectorSource;
 
-        public TextBlockAnomalyDetector(IDocumentVectorSource vectorSource)
+        private ILogger logger;
+
+        public TextBlockAnomalyDetector(IDocumentVectorSource vectorSource, ILoggerFactory factory)
         {
+            if (factory == null)
+            {
+                throw new ArgumentNullException(nameof(factory));
+            }
+
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
+            logger = factory.CreateLogger(GetType());
         }
 
-        public bool Test(T data)
+        public bool Predict(T data)
         {
-            double[][] observations = vectorSource.GetVectors(new IProcessingTextBlock[] {data}, NormalizationType.None);
-            return model.Decide(observations).First();
+            logger.LogDebug("Predict");
+            double[][] observations = vectorSource.GetVectors(new IProcessingTextBlock[] { data }, NormalizationType.None);
+            return model.Decide(observations[0]);
+        }
+
+        public bool[] Predict(T[] data)
+        {
+            logger.LogDebug("Predict");
+            double[][] observations = vectorSource.GetVectors(data.Cast<IProcessingTextBlock>().ToArray(), NormalizationType.None);
+            return model.Decide(observations);
+        }
+
+        public double Probability(T data)
+        {
+            logger.LogDebug("Probability");
+            double[][] observations = vectorSource.GetVectors(new IProcessingTextBlock[] { data }, NormalizationType.None);
+            return model.Probability(observations[0]);
         }
 
         public async Task Train(DataSet<T> dataset, CancellationToken token)
         {
-            var data = dataset.Positive.Concat(dataset.Negative).Cast<IProcessingTextBlock>().ToArray();
-            var y = dataset.Positive.Select(item => 1).Concat(dataset.Negative.Select(item => -1)).ToArray();
-            double[][] observations = vectorSource.GetVectors(data, NormalizationType.None);
+            logger.LogDebug("Train");
+            IProcessingTextBlock[] data = dataset.Positive.Concat(dataset.Negative).Cast<IProcessingTextBlock>().ToArray();
+            int[] yData = dataset.Positive.Select(item => 1).Concat(dataset.Negative.Select(item => -1)).ToArray();
+            double[][] xData = vectorSource.GetVectors(data, NormalizationType.None);
+            Array[] randomized = GlobalSettings.Random.Shuffle(yData, xData).ToArray();
             //standardizer = Standardizer.GetNumericStandardizer(data);
-            var gridsearch = new GridSearch<SupportVectorMachine<Linear>, double[], int>
+            GridSearch<SupportVectorMachine<Linear>, double[], int> gridsearch = new GridSearch<SupportVectorMachine<Linear>, double[], int>
             {
                 ParameterRanges =
                     new GridSearchRangeCollection
@@ -53,18 +81,25 @@ namespace Wikiled.Text.Anomaly.Processing.Specific
 
 
             gridsearch.Token = token;
-            var result = await Task.Run(() => gridsearch.Learn(observations, y), token);
+            GridSearchResult<SupportVectorMachine<Linear>, double[], int> result = await Task.Run(() => gridsearch.Learn(randomized[1].Cast<double[]>().ToArray(), randomized[0].Cast<int>().ToArray()), token).ConfigureAwait(false);
             model = result.BestModel;
         }
 
         public void Save(string path)
         {
-            throw new NotImplementedException();
+            logger.LogInformation("Save {0}", path);
+            if (model == null)
+            {
+                throw new InvalidOperationException("Model is not trained");
+            }
+
+            model.Save(path);
         }
 
         public void Load(string path)
         {
-            throw new NotImplementedException();
+            logger.LogInformation("Loading {0}", path);
+            model = Serializer.Load<SupportVectorMachine>(path);
         }
     }
 }

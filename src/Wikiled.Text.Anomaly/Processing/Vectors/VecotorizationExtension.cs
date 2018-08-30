@@ -19,7 +19,7 @@ namespace Wikiled.Text.Anomaly.Processing.Vectors
                 blocks.Length,
                 i =>
                 {
-                    var result = source.GetVector(blocks[i], NormalizationType.None).FullValues;
+                    var result = source.GetVector(blocks[i], normalization).FullValues;
                     observations[i] = result;
                 });
 

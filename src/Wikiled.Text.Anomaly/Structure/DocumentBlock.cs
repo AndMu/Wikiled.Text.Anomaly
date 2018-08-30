@@ -20,6 +20,16 @@ namespace Wikiled.Text.Anomaly.Structure
 
             Pages = document.Select(item => new PageBlock(item)).ToArray();
             Sentences = Pages.SelectMany(item => item.Sentences).ToArray();
+            // reindex using global index
+            int index = 0;
+            foreach (var page in Pages)
+            {
+                foreach (var pageSentence in page.Sentences)
+                {
+                    pageSentence.Index = index;
+                    index++;
+                }
+            }
         }
 
         public PageBlock[] Pages { get; }

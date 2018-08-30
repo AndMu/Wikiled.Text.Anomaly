@@ -24,7 +24,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                 }
             }
 
-            return new DetectionResults(withoutSentiment.ToArray(), clusters.ToArray());
+            return new DetectionResults(clusters.ToArray(), withoutSentiment.ToArray());
         }
     }
 }
