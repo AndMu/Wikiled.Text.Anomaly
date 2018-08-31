@@ -1,24 +1,23 @@
-﻿using Accord.MachineLearning;
+﻿using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Accord.IO;
+using Accord.MachineLearning;
 using Accord.MachineLearning.Performance;
 using Accord.MachineLearning.VectorMachines;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Math.Optimization.Losses;
 using Accord.Statistics.Kernels;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Accord.IO;
 using Wikiled.MachineLearning.Mathematics;
 using Wikiled.MachineLearning.Normalization;
-using Wikiled.Text.Anomaly.Processing.Vectors;
 using Wikiled.Text.Anomaly.Structure;
+using Wikiled.Text.Anomaly.Vectors;
 
-namespace Wikiled.Text.Anomaly.Processing.Specific
+namespace Wikiled.Text.Anomaly.Supervised
 {
-    public class TextBlockAnomalyDetector<T>
-        where T : IProcessingTextBlock
+    public class TextBlockAnomalyDetector
     {
         private SupportVectorMachine<Linear> model;
 
@@ -39,31 +38,31 @@ namespace Wikiled.Text.Anomaly.Processing.Specific
             logger = factory.CreateLogger(GetType());
         }
 
-        public bool Predict(T data)
+        public bool Predict(IProcessingTextBlock data)
         {
             logger.LogDebug("Predict");
-            double[][] observations = vectorSource.GetVectors(new IProcessingTextBlock[] { data }, NormalizationType.None);
+            double[][] observations = vectorSource.GetVectors(new[] { data }, NormalizationType.None);
             return model.Decide(observations[0]);
         }
 
-        public bool[] Predict(T[] data)
+        public bool[] Predict(IProcessingTextBlock[] data)
         {
             logger.LogDebug("Predict");
-            double[][] observations = vectorSource.GetVectors(data.Cast<IProcessingTextBlock>().ToArray(), NormalizationType.None);
+            double[][] observations = vectorSource.GetVectors(data, NormalizationType.None);
             return model.Decide(observations);
         }
 
-        public double Probability(T data)
+        public double Probability(IProcessingTextBlock data)
         {
             logger.LogDebug("Probability");
-            double[][] observations = vectorSource.GetVectors(new IProcessingTextBlock[] { data }, NormalizationType.None);
+            double[][] observations = vectorSource.GetVectors(new[] { data }, NormalizationType.None);
             return model.Probability(observations[0]);
         }
 
-        public async Task Train(DataSet<T> dataset, CancellationToken token)
+        public async Task Train(DataSet dataset, CancellationToken token)
         {
             logger.LogDebug("Train");
-            IProcessingTextBlock[] data = dataset.Positive.Concat(dataset.Negative).Cast<IProcessingTextBlock>().ToArray();
+            IProcessingTextBlock[] data = dataset.Positive.Concat(dataset.Negative).ToArray();
             int[] yData = dataset.Positive.Select(item => 1).Concat(dataset.Negative.Select(item => -1)).ToArray();
             double[][] xData = vectorSource.GetVectors(data, NormalizationType.None);
             Array[] randomized = GlobalSettings.Random.Shuffle(yData, xData).ToArray();

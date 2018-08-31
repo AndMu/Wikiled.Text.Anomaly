@@ -5,8 +5,8 @@ using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Analysis.Word2Vec;
 using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Processing.Filters;
-using Wikiled.Text.Anomaly.Processing.Vectors;
 using Wikiled.Text.Anomaly.Structure;
+using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Tests.Processing
 {

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Wikiled.MachineLearning.Normalization;
-using Wikiled.Text.Anomaly.Processing.Specific;
 using Wikiled.Text.Anomaly.Structure;
 
-namespace Wikiled.Text.Anomaly.Processing.Vectors
+namespace Wikiled.Text.Anomaly.Vectors
 {
-    public static class VecotorizationExtension
+    public static class VectorizationExtension
     {
         public static double[][] GetVectors(this IDocumentVectorSource source, IProcessingTextBlock[] blocks, NormalizationType normalization)
         {

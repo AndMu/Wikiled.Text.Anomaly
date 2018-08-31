@@ -1,6 +1,6 @@
 ﻿using System;
 using NLog;
-using Wikiled.Text.Anomaly.Processing.Vectors;
+using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {

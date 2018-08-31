@@ -1,7 +1,7 @@
 ﻿using System;
 using Wikiled.Text.Anomaly.Processing.Filters;
-using Wikiled.Text.Anomaly.Processing.Vectors;
 using Wikiled.Text.Anomaly.Structure;
+using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing
 {
