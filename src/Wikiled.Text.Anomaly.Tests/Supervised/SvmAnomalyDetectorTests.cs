@@ -18,11 +18,11 @@ using DataSet = Wikiled.Text.Anomaly.Supervised.DataSet;
 namespace Wikiled.Text.Anomaly.Tests.Supervised
 {
     [TestFixture]
-    public class TextBlockAnomalyDetectorTests
+    public class SvmAnomalyDetectorTests
     {
         private IDocumentVectorSource vectorSource;
 
-        private TextBlockAnomalyDetector pageDetector;
+        private SvmAnomalyDetector pageDetector;
 
         private DocumentBlock document;
 
@@ -31,7 +31,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
         {
             GlobalSettings.Random = new Random(48);
             vectorSource = new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin")));
-            pageDetector = new TextBlockAnomalyDetector(vectorSource, new NullLoggerFactory(), null);
+            pageDetector = new SvmAnomalyDetector(vectorSource, new NullLoggerFactory(), null);
             document = new DocumentBlock(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
         }
 
@@ -52,21 +52,13 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
             var cm = new GeneralConfusionMatrix(2, expected: expected, predicted: result);
             Assert.GreaterOrEqual(cm.PerClassMatrices[0].FScore, 0.8);
             Assert.GreaterOrEqual(cm.PerClassMatrices[1].FScore, 0.9);
-
-            //pageDetector.Save("model.dat");
-            //pageDetector = new TextBlockAnomalyDetector(vectorSource, new NullLoggerFactory());
-            //pageDetector.Load("model.dat");
-            //result = pageDetector.Predict(document.Pages).Select(item => item ? 1 : 0).ToArray();
-            //cm = new GeneralConfusionMatrix(2, expected: expected, predicted: result);
-            //Assert.GreaterOrEqual(cm.PerClassMatrices[0].FScore, 0.8);
-            //Assert.GreaterOrEqual(cm.PerClassMatrices[1].FScore, 0.9);
         }
 
         [Test]
         public void Construct()
         {
-            Assert.Throws<ArgumentNullException>(() => new TextBlockAnomalyDetector(null, new NullLoggerFactory(), null));
-            Assert.Throws<ArgumentNullException>(() => new TextBlockAnomalyDetector(vectorSource, null, null));
+            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyDetector(null, new NullLoggerFactory(), null));
+            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyDetector(vectorSource, null, null));
         }
     }
 }

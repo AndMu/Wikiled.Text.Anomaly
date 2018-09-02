@@ -16,7 +16,7 @@ using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {
-    public class TextBlockAnomalyDetector
+    public class SvmAnomalyDetector : IAnomalyDetector
     {
         //private Standardizer standardizer;
 
@@ -24,7 +24,7 @@ namespace Wikiled.Text.Anomaly.Supervised
 
         private readonly ILogger logger;
 
-        public TextBlockAnomalyDetector(IDocumentVectorSource vectorSource, ILoggerFactory factory, SupportVectorMachine<Linear> model)
+        public SvmAnomalyDetector(IDocumentVectorSource vectorSource, ILoggerFactory factory, SupportVectorMachine<Linear> model)
         {
             if (factory == null)
             {
@@ -33,7 +33,7 @@ namespace Wikiled.Text.Anomaly.Supervised
 
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
             logger = factory.CreateLogger(GetType());
-            this.Model = model;
+            Model = model;
         }
 
         public SupportVectorMachine<Linear> Model { get; private set; }

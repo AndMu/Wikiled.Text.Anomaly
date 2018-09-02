@@ -18,7 +18,7 @@ using Wikiled.Text.Anomaly.Vectors;
 namespace Wikiled.Text.Anomaly.Tests.Supervised
 {
     [TestFixture]
-    public class ModelStorageTests
+    public class SvmModelStorageTests
     {
         private ILoggerFactory loggerFactory;
 
@@ -26,7 +26,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
 
         private IDocumentReconstructor documentReconstructor;
 
-        private ModelStorage instance;
+        private SvmModelStorage instance;
 
         private Document[] documents;
 
@@ -48,15 +48,15 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
         [Test]
         public void Construct()
         {
-            Assert.Throws<ArgumentNullException>(() => new ModelStorage(
+            Assert.Throws<ArgumentNullException>(() => new SvmModelStorage(
                 null,
                 vectorSource,
                 documentReconstructor));
-            Assert.Throws<ArgumentNullException>(() => new ModelStorage(
+            Assert.Throws<ArgumentNullException>(() => new SvmModelStorage(
                 loggerFactory,
                 null,
                 documentReconstructor));
-            Assert.Throws<ArgumentNullException>(() => new ModelStorage(
+            Assert.Throws<ArgumentNullException>(() => new SvmModelStorage(
                 loggerFactory,
                 vectorSource,
                 null));
@@ -90,9 +90,9 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
             Assert.GreaterOrEqual(cm.PerClassMatrices[1].FScore, 0.9);
         }
 
-        private ModelStorage CreateModelStorage()
+        private SvmModelStorage CreateModelStorage()
         {
-            return new ModelStorage(
+            return new SvmModelStorage(
                 loggerFactory,
                 vectorSource,
                 documentReconstructor);
