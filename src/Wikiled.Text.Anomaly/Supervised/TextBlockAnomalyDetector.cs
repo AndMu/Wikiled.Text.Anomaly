@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Accord.IO;
 using Accord.MachineLearning;
 using Accord.MachineLearning.Performance;
 using Accord.MachineLearning.VectorMachines;
@@ -19,15 +18,13 @@ namespace Wikiled.Text.Anomaly.Supervised
 {
     public class TextBlockAnomalyDetector
     {
-        private SupportVectorMachine<Linear> model;
-
         //private Standardizer standardizer;
 
         private readonly IDocumentVectorSource vectorSource;
 
-        private ILogger logger;
+        private readonly ILogger logger;
 
-        public TextBlockAnomalyDetector(IDocumentVectorSource vectorSource, ILoggerFactory factory)
+        public TextBlockAnomalyDetector(IDocumentVectorSource vectorSource, ILoggerFactory factory, SupportVectorMachine<Linear> model)
         {
             if (factory == null)
             {
@@ -36,27 +33,30 @@ namespace Wikiled.Text.Anomaly.Supervised
 
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
             logger = factory.CreateLogger(GetType());
+            this.Model = model;
         }
+
+        public SupportVectorMachine<Linear> Model { get; private set; }
 
         public bool Predict(IProcessingTextBlock data)
         {
             logger.LogDebug("Predict");
             double[][] observations = vectorSource.GetVectors(new[] { data }, NormalizationType.None);
-            return model.Decide(observations[0]);
+            return Model.Decide(observations[0]);
         }
 
         public bool[] Predict(IProcessingTextBlock[] data)
         {
             logger.LogDebug("Predict");
             double[][] observations = vectorSource.GetVectors(data, NormalizationType.None);
-            return model.Decide(observations);
+            return Model.Decide(observations);
         }
 
         public double Probability(IProcessingTextBlock data)
         {
             logger.LogDebug("Probability");
             double[][] observations = vectorSource.GetVectors(new[] { data }, NormalizationType.None);
-            return model.Probability(observations[0]);
+            return Model.Probability(observations[0]);
         }
 
         public async Task Train(DataSet dataset, CancellationToken token)
@@ -81,24 +81,7 @@ namespace Wikiled.Text.Anomaly.Supervised
 
             gridsearch.Token = token;
             GridSearchResult<SupportVectorMachine<Linear>, double[], int> result = await Task.Run(() => gridsearch.Learn(randomized[1].Cast<double[]>().ToArray(), randomized[0].Cast<int>().ToArray()), token).ConfigureAwait(false);
-            model = result.BestModel;
-        }
-
-        public void Save(string path)
-        {
-            logger.LogInformation("Save {0}", path);
-            if (model == null)
-            {
-                throw new InvalidOperationException("Model is not trained");
-            }
-
-            model.Save(path);
-        }
-
-        public void Load(string path)
-        {
-            logger.LogInformation("Loading {0}", path);
-            model = Serializer.Load<SupportVectorMachine>(path);
+            Model = result.BestModel;
         }
     }
 }
