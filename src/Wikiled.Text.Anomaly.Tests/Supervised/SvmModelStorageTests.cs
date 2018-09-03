@@ -83,7 +83,12 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
             Assert.GreaterOrEqual(cm.PerClassMatrices[1].FScore, 0.9);
 
             instance.Save("Result");
-            instance.Load("Result");
+            SvmModelStorageFactory storageFactory = new SvmModelStorageFactory(
+                loggerFactory,
+                vectorSource,
+                documentReconstructor,
+                new LocationConfig { Location = TestContext.CurrentContext.TestDirectory });
+            instance = (SvmModelStorage)storageFactory.Construct("Result");
             result = pageDetector.Predict(new DocumentBlock(documents).Pages).Select(item => item ? 1 : 0).ToArray();
             cm = new GeneralConfusionMatrix(2, expected: expected, predicted: result);
             Assert.GreaterOrEqual(cm.PerClassMatrices[0].FScore, 0.8);

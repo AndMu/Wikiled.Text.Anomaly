@@ -1,12 +1,7 @@
 using System;
-using System.Linq;
 using Moq;
 using NUnit.Framework;
-using Wikiled.MachineLearning.Mathematics.Vectors;
-using Wikiled.MachineLearning.Normalization;
-using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing.Filters;
-using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Tests.Processing.Filters

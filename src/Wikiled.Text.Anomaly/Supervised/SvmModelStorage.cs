@@ -117,7 +117,7 @@ namespace Wikiled.Text.Anomaly.Supervised
                                   Positive = positive.Select(item => new ProcessingTextBlock(item.Sentences.ToArray())).ToArray(),
                                   Negative = negative.Select(item => new ProcessingTextBlock(item.Sentences.ToArray())).ToArray()
                               };
-            await detector.Train(dataset, token);
+            await detector.Train(dataset, token).ConfigureAwait(false);
             current = detector;
             return detector;
         }
