@@ -14,9 +14,9 @@ namespace Wikiled.Text.Anomaly.Supervised
 
         private readonly IDocumentVectorSource vectorSource;
 
-        private readonly LocationConfig config;
+        private readonly StorageConfig config;
 
-        public SvmModelStorageFactory(ILoggerFactory factory, IDocumentVectorSource vectorSource, IDocumentReconstructor reconstructor, LocationConfig config)
+        public SvmModelStorageFactory(ILoggerFactory factory, IDocumentVectorSource vectorSource, IDocumentReconstructor reconstructor, StorageConfig config)
         {
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
