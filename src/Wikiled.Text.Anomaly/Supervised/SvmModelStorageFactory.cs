@@ -22,6 +22,10 @@ namespace Wikiled.Text.Anomaly.Supervised
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
             this.reconstructor = reconstructor ?? throw new ArgumentNullException(nameof(reconstructor));
             this.config = config ?? throw new ArgumentNullException(nameof(config));
+            if (config.Location == null)
+            {
+                throw new ArgumentNullException(nameof(config.Location));
+            }
         }
 
         public IModelStorage Construct(string name)
