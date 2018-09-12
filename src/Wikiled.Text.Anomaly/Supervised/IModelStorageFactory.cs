@@ -3,5 +3,7 @@
     public interface IModelStorageFactory
     {
         IModelStorage Construct(string name);
+
+        void Save(string name, IModelStorage storage);
     }
 }

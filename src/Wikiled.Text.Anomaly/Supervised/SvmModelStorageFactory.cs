@@ -14,9 +14,9 @@ namespace Wikiled.Text.Anomaly.Supervised
 
         private readonly IDocumentVectorSource vectorSource;
 
-        private readonly LocationConfig config;
+        private readonly StorageConfig config;
 
-        public SvmModelStorageFactory(ILoggerFactory factory, IDocumentVectorSource vectorSource, IDocumentReconstructor reconstructor, LocationConfig config)
+        public SvmModelStorageFactory(ILoggerFactory factory, IDocumentVectorSource vectorSource, IDocumentReconstructor reconstructor, StorageConfig config)
         {
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
@@ -43,6 +43,22 @@ namespace Wikiled.Text.Anomaly.Supervised
             }
 
             return model;
+        }
+
+        public void Save(string name, IModelStorage storage)
+        {
+            if (storage == null)
+            {
+                throw new ArgumentNullException(nameof(storage));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
+            }
+
+            var location = Path.Combine(config.Location, name);
+            storage.Save(location);
         }
     }
 }

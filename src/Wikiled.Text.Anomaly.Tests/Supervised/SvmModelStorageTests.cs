@@ -87,7 +87,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
                 loggerFactory,
                 vectorSource,
                 documentReconstructor,
-                new LocationConfig { Location = TestContext.CurrentContext.TestDirectory });
+                new StorageConfig { Location = TestContext.CurrentContext.TestDirectory });
             instance = (SvmModelStorage)storageFactory.Construct("Result");
             result = pageDetector.Predict(new DocumentBlock(documents).Pages).Select(item => item ? 1 : 0).ToArray();
             cm = new GeneralConfusionMatrix(2, expected: expected, predicted: result);
