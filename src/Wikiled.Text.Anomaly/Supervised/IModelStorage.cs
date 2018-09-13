@@ -8,6 +8,8 @@ namespace Wikiled.Text.Anomaly.Supervised
     {
         IAnomalyDetector Current { get; }
 
+        void Reset();
+
         void Add(DataType type, params IProcessingTextBlock[] blocks);
 
         IAnomalyDetector Load(string path);

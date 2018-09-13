@@ -31,6 +31,8 @@ namespace Wikiled.Text.Anomaly.Supervised
 
         private List<Document> positive = new List<Document>();
 
+        private Dictionary<string, Document> duplicate = new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase);
+
         private SvmAnomalyDetector current;
 
         public SvmModelStorage(ILoggerFactory factory, IDocumentVectorSource vectorSource, IDocumentReconstructor reconstructor)
@@ -43,17 +45,42 @@ namespace Wikiled.Text.Anomaly.Supervised
 
         public IAnomalyDetector Current => current;
 
+        public void Reset()
+        {
+            logger.LogDebug("Reset");
+            negative.Clear();
+            positive.Clear();
+            duplicate.Clear();
+            current = null;
+        }
+
         public void Add(DataType type, params IProcessingTextBlock[] blocks)
         {
             logger.LogDebug("Add: {0}", type);
             IEnumerable<Document> documents = blocks.Select(item => reconstructor.Reconstruct(item.Sentences));
-            if (type == DataType.Positive)
+            foreach (var document in documents)
             {
-                positive.AddRange(documents);
-            }
-            else
-            {
-                negative.AddRange(documents);
+                if (string.IsNullOrEmpty(document.Text))
+                {
+                    logger.LogWarning("Ignoring empty document");
+                    continue;
+                }
+
+                if (duplicate.ContainsKey(document.Text))
+                {
+                    logger.LogWarning("Duplicate document detected - ignoring");
+                    continue;
+                }
+
+                duplicate[document.Text] = document;
+                if (type == DataType.Positive)
+                {
+                    positive.Add(document);
+                }
+                else
+                {
+                    negative.Add(document);
+                }
             }
         }
 
@@ -66,14 +93,14 @@ namespace Wikiled.Text.Anomaly.Supervised
             {
                 logger.LogDebug("Loading <{0}> positive documents", files.postiveFile);
                 Document[] positiveDocs = JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(files.postiveFile));
-                positive = new List<Document>(positiveDocs);
+                positive = GetDocuments(positiveDocs);
             }
 
             if (File.Exists(files.negativeFile))
             {
                 logger.LogDebug("Loading <{0}> negative documents", files.negativeFile);
                 Document[] negativeDocs = JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(files.negativeFile));
-                negative = new List<Document>(negativeDocs);
+                negative = GetDocuments(negativeDocs);
             }
 
             SupportVectorMachine<Linear> model = null;
@@ -117,6 +144,7 @@ namespace Wikiled.Text.Anomaly.Supervised
                 Positive = positive.Select(item => new ProcessingTextBlock(item.Sentences.ToArray())).ToArray(),
                 Negative = negative.Select(item => new ProcessingTextBlock(item.Sentences.ToArray())).ToArray()
             };
+
             await detector.Train(dataset, token).ConfigureAwait(false);
             current = detector;
             return detector;
@@ -128,6 +156,17 @@ namespace Wikiled.Text.Anomaly.Supervised
             string negativeFile = Path.Combine(path, "negative.json");
             string modelFile = Path.Combine(path, "model.dat");
             return (positiveFile, negativeFile, modelFile);
+        }
+
+        private List<Document> GetDocuments(Document[] documents)
+        {
+            var list = new List<Document>(documents);
+            foreach (var doc in documents)
+            {
+                duplicate[doc.Text] = doc;
+            }
+
+            return list;
         }
     }
 }
