@@ -18,8 +18,6 @@ namespace Wikiled.Text.Anomaly.Supervised
 {
     public class SvmAnomalyDetector : IAnomalyDetector
     {
-        //private Standardizer standardizer;
-
         private readonly IDocumentVectorSource vectorSource;
 
         private readonly ILogger logger;
