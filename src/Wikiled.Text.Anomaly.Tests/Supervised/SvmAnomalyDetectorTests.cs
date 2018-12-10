@@ -49,7 +49,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
                 expected[i] = 1;
             }
 
-            var cm = new GeneralConfusionMatrix(2, expected: expected, predicted: result);
+            var cm = new GeneralConfusionMatrix(2, expected, result);
             Assert.GreaterOrEqual(cm.PerClassMatrices[0].FScore, 0.8);
             Assert.GreaterOrEqual(cm.PerClassMatrices[1].FScore, 0.9);
         }

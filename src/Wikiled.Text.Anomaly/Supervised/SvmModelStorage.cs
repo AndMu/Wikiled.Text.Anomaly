@@ -31,7 +31,7 @@ namespace Wikiled.Text.Anomaly.Supervised
 
         private List<Document> positive = new List<Document>();
 
-        private Dictionary<string, Document> duplicate = new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, Document> duplicate = new Dictionary<string, Document>(StringComparer.OrdinalIgnoreCase);
 
         private SvmAnomalyDetector current;
 
