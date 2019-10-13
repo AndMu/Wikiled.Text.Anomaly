@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
+using Microsoft.Extensions.Logging;
 using NLog;
 using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
@@ -14,22 +15,23 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
 {
     public class SvmAnomalyFilter : IAnomalyFilter
     {
-        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger<SvmAnomalyFilter> logger;
 
         private readonly IDocumentVectorSource vectorSource;
 
-        public SvmAnomalyFilter(IDocumentVectorSource vectorSource)
+        public SvmAnomalyFilter(ILogger<SvmAnomalyFilter> logger, IDocumentVectorSource vectorSource)
         {
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public FilterTypes Type => FilterTypes.Svm;
 
-        public DetectionResults Filter(ComplexDocument document)
+        public DetectionResults Filter(DocumentClusters document)
         {
             if (document.Clusters.Length < 3)
             {
-                logger.Info("Not enought text clusters for clustering");
+                logger.LogInformation("Not enought text clusters for clustering");
                 return new DetectionResults(document.Clusters);
             }
 

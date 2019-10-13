@@ -1,23 +1,24 @@
 ﻿using System;
-using NLog;
+using Microsoft.Extensions.Logging;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
     public class AnomalyFilterFactory : IAnomalyFilterFactory
     {
-        private static readonly ILogger logger = LogManager.GetCurrentClassLogger();
+        private readonly ILogger<AnomalyFilterFactory> logger;
 
         private readonly IDocumentVectorSource vectorSource;
 
-        public AnomalyFilterFactory(IDocumentVectorSource vectorSource)
+        public AnomalyFilterFactory(ILogger<AnomalyFilterFactory> logger, IDocumentVectorSource vectorSource)
         {
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public IAnomalyFilter Create(FilterTypes type)
         {
-            logger.Debug("Create: {0}", type);
+            logger.LogDebug("Create: {0}", type);
             switch (type)
             {
                 case FilterTypes.Sentiment:

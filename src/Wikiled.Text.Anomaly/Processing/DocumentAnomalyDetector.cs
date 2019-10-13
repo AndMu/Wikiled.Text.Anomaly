@@ -1,8 +1,8 @@
-﻿using NLog;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+using MoreLinq.Extensions;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Anomaly.Processing.Filters;
@@ -12,7 +12,7 @@ namespace Wikiled.Text.Anomaly.Processing
 {
     public class DocumentAnomalyDetector : IDocumentAnomalyDetector
     {
-        private static readonly Logger<> log = LogManager.GetCurrentClassLogger();
+        private readonly ILogger<DocumentAnomalyDetector> log;
 
         private readonly IAnomalyFilterFactory factory;
 
@@ -20,13 +20,14 @@ namespace Wikiled.Text.Anomaly.Processing
 
         private readonly List<IProcessingTextBlock> anomaly = new List<IProcessingTextBlock>();
 
-        private readonly DocumentBlock document;
+        private readonly ComplexDocument document;
 
-        public DocumentAnomalyDetector(DocumentBlock document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, int windowSize = 3)
+        public DocumentAnomalyDetector(ILogger<DocumentAnomalyDetector> log, ComplexDocument document, IAnomalyFilterFactory factory, IDocumentReconstructor reconstructor, int windowSize = 3)
         {
             this.document = document ?? throw new ArgumentNullException(nameof(document));
             this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.reconstructor = reconstructor ?? throw new ArgumentNullException(nameof(reconstructor));
+            this.log = log ?? throw new ArgumentNullException(nameof(log));
             WindowSize = windowSize;
         }
 
@@ -39,15 +40,15 @@ namespace Wikiled.Text.Anomaly.Processing
                 throw new ArgumentException("Value cannot be an empty collection.", nameof(types));
             }
 
-            log.Debug("Detect");
+            log.LogDebug("Detect");
             anomaly.Clear();
             if(document.Sentences.Length <= 3)
             {
-                log.Debug("Detect - text too short");
+                log.LogDebug("Detect - text too short");
                 return new DetectionResult(reconstructor.Reconstruct(document.Sentences), anomaly.ToArray());
             }
 
-            log.Info("Using sentence clustering");
+            log.LogInformation("Using sentence clustering");
             var sentenceClusters = GetSentencesBlock().ToArray();
 
             foreach(FilterTypes filterTypes in types)
@@ -60,7 +61,7 @@ namespace Wikiled.Text.Anomaly.Processing
             return new DetectionResult(reconstructor.Reconstruct(sentenceClusters.SelectMany(item => item.Sentences).Distinct().ToArray()), anomaly.ToArray());
         }
 
-        private IEnumerable<ProcessingTextBlock> GetSentencesBlock()
+        private IEnumerable<IProcessingTextBlock> GetSentencesBlock()
         {
             foreach(var next in document.Pages.Select(item => item.Sentences.Window(WindowSize)))
             {

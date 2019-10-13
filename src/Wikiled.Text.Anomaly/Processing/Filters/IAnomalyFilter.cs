@@ -1,4 +1,5 @@
-﻿using Wikiled.Text.Anomaly.Structure;
+﻿using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
@@ -6,6 +7,6 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
     {
         FilterTypes Type { get; }
 
-        DetectionResults Filter(ComplexDocument document);
+        DetectionResults Filter(DocumentClusters document);
     }
 }

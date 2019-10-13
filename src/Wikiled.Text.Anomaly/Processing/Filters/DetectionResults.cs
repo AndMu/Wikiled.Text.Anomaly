@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Wikiled.Text.Anomaly.Structure;
+using Wikiled.Text.Analysis.Structure;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters
 {
