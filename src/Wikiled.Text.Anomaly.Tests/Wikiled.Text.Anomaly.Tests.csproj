@@ -6,14 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Moq" Version="4.10.1" />
-    <PackageReference Include="NUnit" version="3.11.0" />
-    <PackageReference Include="Wikiled.MachineLearning" Version="2.4.5" />
-    <PackageReference Include="Wikiled.Text.Analysis" Version="1.6.34" />
-    <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.20" />
-    <PackageReference Include="Wikiled.Text.Style" Version="1.0.12" />
-    <packagereference Include="Microsoft.NET.Test.Sdk" Version="15.9.0"></packagereference>
-    <packagereference Include="NUnit3TestAdapter" Version="3.11.2" />
+    <PackageReference Include="Moq" Version="4.13.0" />
+    <PackageReference Include="NUnit" version="3.12.0" />
+    <PackageReference Include="Wikiled.MachineLearning" Version="2.4.25" />
+    <PackageReference Include="Wikiled.Text.Analysis" Version="1.7.24-CI" />
+    <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.25" />
+    <PackageReference Include="Wikiled.Text.Style" Version="1.0.23" />
+    <packagereference Include="Microsoft.NET.Test.Sdk" Version="16.3.0"></packagereference>
+    <packagereference Include="NUnit3TestAdapter" Version="3.15.1" />
 
   </ItemGroup>
 

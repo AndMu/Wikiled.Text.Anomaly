@@ -1,6 +1,7 @@
 ﻿using System;
+using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Anomaly.Processing.Filters;
-using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing
@@ -14,7 +15,7 @@ namespace Wikiled.Text.Anomaly.Processing
             this.documentVector = documentVector ?? throw new ArgumentNullException(nameof(documentVector));
         }
 
-        public IDocumentAnomalyDetector CreateSimple(DocumentBlock document, int windowSize = 3)
+        public IDocumentAnomalyDetector CreateSimple(ComplexDocument document, int windowSize = 3)
         {
             return new DocumentAnomalyDetector(
                 document,

@@ -8,7 +8,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
     {
         public FilterTypes Type => FilterTypes.Sentiment;
 
-        public DetectionResults Filter(DocumentClusters document)
+        public DetectionResults Filter(ComplexDocument document)
         {
             List<ProcessingTextBlock> clusters = new List<ProcessingTextBlock>();
             List<ProcessingTextBlock> withoutSentiment = new List<ProcessingTextBlock>();

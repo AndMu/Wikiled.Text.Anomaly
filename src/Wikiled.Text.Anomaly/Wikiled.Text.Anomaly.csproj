@@ -15,12 +15,12 @@
   
   <ItemGroup>
     <PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
-    <PackageReference Include="morelinq" Version="3.0.0" />
-    <PackageReference Include="Wikiled.Common.Utilities" Version="1.1.11" />
-    <PackageReference Include="Wikiled.MachineLearning" Version="2.4.5" />
-    <PackageReference Include="Wikiled.Text.Analysis" Version="1.6.34" />
-    <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.20" />
-    <PackageReference Include="Wikiled.Text.Style" Version="1.0.12" />
+    <PackageReference Include="morelinq" Version="3.2.0" />
+    <PackageReference Include="Wikiled.Common.Utilities" Version="1.2.18" />
+    <PackageReference Include="Wikiled.MachineLearning" Version="2.4.25" />
+    <PackageReference Include="Wikiled.Text.Analysis" Version="1.7.24-CI" />
+    <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.25" />
+    <PackageReference Include="Wikiled.Text.Style" Version="1.0.23" />
   </ItemGroup>
   
   <Target Name="IncludeP2PAssets">

@@ -25,7 +25,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
 
         public FilterTypes Type => FilterTypes.Svm;
 
-        public DetectionResults Filter(DocumentClusters document)
+        public DetectionResults Filter(ComplexDocument document)
         {
             if (document.Clusters.Length < 3)
             {

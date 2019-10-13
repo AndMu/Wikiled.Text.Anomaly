@@ -1,9 +1,9 @@
-﻿using Wikiled.Text.Anomaly.Structure;
+﻿using Wikiled.Text.Analysis.Structure;
 
 namespace Wikiled.Text.Anomaly.Processing
 {
     public interface IAnomalyFactory
     {
-        IDocumentAnomalyDetector CreateSimple(DocumentBlock document, int windowSize = 3);
+        IDocumentAnomalyDetector CreateSimple(ComplexDocument document, int windowSize = 3);
     }
 }

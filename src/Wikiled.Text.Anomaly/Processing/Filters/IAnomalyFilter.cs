@@ -6,6 +6,6 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
     {
         FilterTypes Type { get; }
 
-        DetectionResults Filter(DocumentClusters document);
+        DetectionResults Filter(ComplexDocument document);
     }
 }

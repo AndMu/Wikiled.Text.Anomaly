@@ -65,7 +65,7 @@ namespace Wikiled.Text.Anomaly.Supervised
             double[][] xData = vectorSource.GetVectors(data, NormalizationType.None);
             Array[] randomized = GlobalSettings.Random.Shuffle(yData, xData).ToArray();
             //standardizer = Standardizer.GetNumericStandardizer(data);
-            GridSearch<SupportVectorMachine<Linear>, double[], int> gridsearch = new GridSearch<SupportVectorMachine<Linear>, double[], int>
+            var gridsearch = new GridSearch<SupportVectorMachine<Linear>, double[], int>
             {
                 ParameterRanges =
                     new GridSearchRangeCollection

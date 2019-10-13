@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MoreLinq.Extensions;
+using Microsoft.Extensions.Logging;
+using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Anomaly.Processing.Filters;
 using Wikiled.Text.Anomaly.Structure;
 
@@ -10,7 +12,7 @@ namespace Wikiled.Text.Anomaly.Processing
 {
     public class DocumentAnomalyDetector : IDocumentAnomalyDetector
     {
-        private static readonly Logger log = LogManager.GetCurrentClassLogger();
+        private static readonly Logger<> log = LogManager.GetCurrentClassLogger();
 
         private readonly IAnomalyFilterFactory factory;
 
@@ -50,7 +52,7 @@ namespace Wikiled.Text.Anomaly.Processing
 
             foreach(FilterTypes filterTypes in types)
             {
-                DetectionResults result = factory.Create(filterTypes).Filter(new DocumentClusters(sentenceClusters));
+                DetectionResults result = factory.Create(filterTypes).Filter(new ComplexDocument(sentenceClusters));
                 anomaly.AddRange(result.Anomaly);
                 sentenceClusters = result.Result;
             }
