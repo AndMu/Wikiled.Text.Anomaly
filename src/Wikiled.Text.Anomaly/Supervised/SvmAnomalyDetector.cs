@@ -1,22 +1,23 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Accord.MachineLearning;
+﻿using Accord.MachineLearning;
 using Accord.MachineLearning.Performance;
 using Accord.MachineLearning.VectorMachines;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Math.Optimization.Losses;
 using Accord.Statistics.Kernels;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Wikiled.MachineLearning.Mathematics;
 using Wikiled.MachineLearning.Normalization;
-using Wikiled.Text.Anomaly.Structure;
+using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {
-    public class SvmAnomalyDetector : IAnomalyDetector
+    public class SvmAnomalyDetector : IAnomalyDetector, IModel
     {
         private readonly IDocumentVectorSource vectorSource;
 

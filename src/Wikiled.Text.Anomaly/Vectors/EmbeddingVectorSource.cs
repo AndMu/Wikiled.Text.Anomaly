@@ -1,7 +1,7 @@
 ﻿using Wikiled.MachineLearning.Mathematics.Vectors;
 using Wikiled.MachineLearning.Normalization;
+using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Analysis.Word2Vec;
-using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Vectors
 {
@@ -18,7 +18,7 @@ namespace Wikiled.Text.Anomaly.Vectors
 
         public VectorData GetVector(IProcessingTextBlock textBlock, NormalizationType normalization)
         {
-            var currentVector = model.GetParagraphVector(textBlock.Sentences);
+            var currentVector = model.GetParagraphVector(textBlock.Sentences.ToArray());
             return vectorDataFactory.CreateSimple(normalization, Convert(currentVector));
         }
 

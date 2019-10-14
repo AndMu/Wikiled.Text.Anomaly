@@ -9,11 +9,11 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using Wikiled.MachineLearning.Mathematics;
 using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Analysis.Word2Vec;
 using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Supervised;
 using Wikiled.Text.Anomaly.Vectors;
-using DataSet = Wikiled.Text.Anomaly.Supervised.DataSet;
 
 namespace Wikiled.Text.Anomaly.Tests.Supervised
 {
@@ -24,7 +24,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
 
         private SvmAnomalyDetector pageDetector;
 
-        private DocumentBlock document;
+        private ComplexDocument document;
 
         [SetUp]
         public void SetUp()
@@ -32,7 +32,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
             GlobalSettings.Random = new Random(48);
             vectorSource = new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin")));
             pageDetector = new SvmAnomalyDetector(vectorSource, new NullLoggerFactory(), null);
-            document = new DocumentBlock(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
+            document = new ComplexDocument(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
         }
 
         [Test]

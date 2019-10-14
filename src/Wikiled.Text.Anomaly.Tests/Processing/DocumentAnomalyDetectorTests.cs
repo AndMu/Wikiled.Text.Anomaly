@@ -15,19 +15,19 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
     {
         private AnomalyFactory instance;
 
-        private DocumentBlock document;
+        private ComplexDocument document;
 
         [SetUp]
         public void Setup()
         {
-            document = new DocumentBlock(Global.InitDocument("cv002_17424.txt"));
+            document = new ComplexDocument(Global.InitDocument("cv002_17424.txt"));
             instance = new AnomalyFactory(new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin"))));
         }
 
         [Test]
         public void AnomalySvm()
         {
-            document = new DocumentBlock(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
+            document = new ComplexDocument(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
             var distances = instance.CreateSimple(document);
             var result = distances.Detect(FilterTypes.Svm);
             Assert.AreEqual(784, document.Sentences.Length);
@@ -64,7 +64,7 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
         [Test]
         public void AnomalySentimentDocument()
         {
-            document = new DocumentBlock(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
+            document = new ComplexDocument(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
             var distances = instance.CreateSimple(document);
             var result = distances.Detect(FilterTypes.Svm, FilterTypes.Sentiment);
             Assert.AreEqual(784, document.Sentences.Length);

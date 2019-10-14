@@ -53,7 +53,7 @@ namespace Wikiled.Text.Anomaly.Processing
 
             foreach(FilterTypes filterTypes in types)
             {
-                DetectionResults result = factory.Create(filterTypes).Filter(new ComplexDocument(sentenceClusters));
+                DetectionResults result = factory.Create(filterTypes).Filter(new DocumentClusters(sentenceClusters));
                 anomaly.AddRange(result.Anomaly);
                 sentenceClusters = result.Result;
             }

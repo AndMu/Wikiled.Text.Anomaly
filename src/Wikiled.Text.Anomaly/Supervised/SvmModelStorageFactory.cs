@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.Logging;
+using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Anomaly.Processing;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {
-    public class SvmModelStorageFactory : IModelStorageFactory
+    public class SvmModelStorageFactory : IModelStorageFactory<ModelStorage<SvmAnomalyDetector>>
     {
         private readonly ILoggerFactory factory;
 

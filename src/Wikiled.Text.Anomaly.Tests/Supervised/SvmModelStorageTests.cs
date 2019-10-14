@@ -1,3 +1,4 @@
+using Accord.Statistics.Analysis;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
@@ -7,11 +8,9 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Accord.Statistics.Analysis;
 using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Analysis.Word2Vec;
-using Wikiled.Text.Anomaly.Processing;
-using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Supervised;
 using Wikiled.Text.Anomaly.Vectors;
 

@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Wikiled.Text.Anomaly.Structure;
+using Wikiled.Text.Analysis.Structure;
+using Wikiled.Text.Analysis.Structure.Model;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {

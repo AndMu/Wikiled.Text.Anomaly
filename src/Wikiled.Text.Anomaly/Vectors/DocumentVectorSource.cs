@@ -4,8 +4,8 @@ using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.NLP.NRC;
 using Wikiled.Text.Analysis.Reflection;
 using Wikiled.Text.Analysis.Reflection.Data;
+using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Anomaly.Processing;
-using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Style.Logic;
 
 namespace Wikiled.Text.Anomaly.Vectors
@@ -29,7 +29,7 @@ namespace Wikiled.Text.Anomaly.Vectors
 
         public VectorData GetVector(IProcessingTextBlock normalBlock, NormalizationType normalization)
         {
-            var normal = styleFactory.ConstructTextBlock(normalBlock.Sentences);
+            var normal = styleFactory.ConstructTextBlock(normalBlock.Sentences.ToArray());
             DataTree tree;
             switch (anomalyVectorType)
             {

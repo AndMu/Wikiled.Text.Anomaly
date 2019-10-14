@@ -5,10 +5,8 @@ using System.Text;
 using Accord.MachineLearning.VectorMachines.Learning;
 using Accord.Statistics.Kernels;
 using Microsoft.Extensions.Logging;
-using NLog;
 using Wikiled.MachineLearning.Normalization;
 using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing.Filters

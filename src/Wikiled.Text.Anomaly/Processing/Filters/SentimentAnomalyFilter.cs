@@ -10,8 +10,8 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
 
         public DetectionResults Filter(DocumentClusters document)
         {
-            var clusters = new List<ProcessingTextBlock>();
-            var withoutSentiment = new List<ProcessingTextBlock>();
+            var clusters = new List<IProcessingTextBlock>();
+            var withoutSentiment = new List<IProcessingTextBlock>();
             foreach (var cluster in document.Clusters)
             {
                 if (cluster.Sentences.Any(item => item.CalculateSentiment().HasValue))

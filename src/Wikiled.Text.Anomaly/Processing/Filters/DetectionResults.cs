@@ -6,12 +6,12 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
 {
     public class DetectionResults
     {
-        public DetectionResults(ProcessingTextBlock[] result)
-            : this(new ProcessingTextBlock[] { }, result)
+        public DetectionResults(IProcessingTextBlock[] result)
+            : this(Array.Empty<IProcessingTextBlock>(), result)
         {
         }
 
-        public DetectionResults(ProcessingTextBlock[] result, ProcessingTextBlock[] anomaly)
+        public DetectionResults(IProcessingTextBlock[] result, IProcessingTextBlock[] anomaly)
         {
             Anomaly = anomaly ?? throw new ArgumentNullException(nameof(anomaly));
             Result = result ?? throw new ArgumentNullException(nameof(result));
@@ -22,8 +22,8 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
             }
         }
 
-        public ProcessingTextBlock[] Anomaly { get; }
+        public IProcessingTextBlock[] Anomaly { get; }
 
-        public ProcessingTextBlock[] Result { get; }
+        public IProcessingTextBlock[] Result { get; }
     }
 }
