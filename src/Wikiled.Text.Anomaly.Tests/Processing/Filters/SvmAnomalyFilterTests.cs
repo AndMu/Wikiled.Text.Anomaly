@@ -1,6 +1,8 @@
-using System;
+using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
+using Wikiled.Common.Testing.Utilities.Logging;
+using Wikiled.Common.Testing.Utilities.Reflection;
 using Wikiled.Text.Anomaly.Processing.Filters;
 using Wikiled.Text.Anomaly.Vectors;
 
@@ -13,6 +15,8 @@ namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
 
         private SvmAnomalyFilter instance;
 
+        private ILogger<SvmAnomalyFilter> logger = TestLogger.Create<SvmAnomalyFilter>();
+
         [SetUp]
         public void SetUp()
         {
@@ -23,12 +27,12 @@ namespace Wikiled.Text.Anomaly.Tests.Processing.Filters
         [Test]
         public void Construct()
         {
-            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyFilter(null));
+            ConstructorHelper.ConstructorMustThrowArgumentNullException(typeof(SvmAnomalyFilter));
         }
 
         private SvmAnomalyFilter CreateInstance()
         {
-            return new SvmAnomalyFilter(mockDocumentVectorSource.Object);
+            return new SvmAnomalyFilter(logger, mockDocumentVectorSource.Object);
         }
     }
 }

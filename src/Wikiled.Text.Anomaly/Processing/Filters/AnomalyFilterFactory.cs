@@ -8,12 +8,15 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
     {
         private readonly ILogger<AnomalyFilterFactory> logger;
 
+        private readonly ILoggerFactory loggerFactory;
+
         private readonly IDocumentVectorSource vectorSource;
 
-        public AnomalyFilterFactory(ILogger<AnomalyFilterFactory> logger, IDocumentVectorSource vectorSource)
+        public AnomalyFilterFactory(ILoggerFactory loggerFactory, IDocumentVectorSource vectorSource)
         {
+            this.loggerFactory = loggerFactory;
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            logger = loggerFactory.CreateLogger<AnomalyFilterFactory>();
         }
 
         public IAnomalyFilter Create(FilterTypes type)
@@ -24,7 +27,7 @@ namespace Wikiled.Text.Anomaly.Processing.Filters
                 case FilterTypes.Sentiment:
                     return new SentimentAnomalyFilter();
                 case FilterTypes.Svm:
-                    return new SvmAnomalyFilter(vectorSource);
+                    return new SvmAnomalyFilter(loggerFactory.CreateLogger< SvmAnomalyFilter>(), vectorSource);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }

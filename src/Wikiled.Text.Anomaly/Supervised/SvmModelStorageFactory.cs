@@ -1,35 +1,33 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.IO;
-using Microsoft.Extensions.Logging;
 using Wikiled.Text.Analysis.Structure.Model;
-using Wikiled.Text.Anomaly.Processing;
-using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {
-    public class SvmModelStorageFactory : IModelStorageFactory<ModelStorage<SvmAnomalyDetector>>
+    public class SvmModelStorageFactory : IModelStorageFactory<SvmAnomalyDetector>
     {
-        private readonly ILoggerFactory factory;
+        private readonly ILoggerFactory loggerFactory;
 
         private readonly IDocumentReconstructor reconstructor;
 
-        private readonly IDocumentVectorSource vectorSource;
-
         private readonly StorageConfig config;
 
-        public SvmModelStorageFactory(ILoggerFactory factory, IDocumentVectorSource vectorSource, IDocumentReconstructor reconstructor, StorageConfig config)
+        private IModelFactory<SvmAnomalyDetector> modelFactory;
+
+        public SvmModelStorageFactory(ILoggerFactory factory, IDocumentReconstructor reconstructor, StorageConfig config, IModelFactory<SvmAnomalyDetector> modelFactory)
         {
-            this.factory = factory ?? throw new ArgumentNullException(nameof(factory));
-            this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
+            this.loggerFactory = factory ?? throw new ArgumentNullException(nameof(factory));
             this.reconstructor = reconstructor ?? throw new ArgumentNullException(nameof(reconstructor));
             this.config = config ?? throw new ArgumentNullException(nameof(config));
+            this.modelFactory = modelFactory;
             if (config.Location == null)
             {
                 throw new ArgumentNullException(nameof(config.Location));
             }
         }
 
-        public IModelStorage Construct(string name)
+        public IModelStorage<SvmAnomalyDetector> Construct(string name)
         {
             if (name == null)
             {
@@ -37,7 +35,7 @@ namespace Wikiled.Text.Anomaly.Supervised
             }
 
             var location = Path.Combine(config.Location, name);
-            var model = new SvmModelStorage(factory, vectorSource, reconstructor);
+            var model = new ModelStorage<SvmAnomalyDetector>(loggerFactory.CreateLogger<ModelStorage<SvmAnomalyDetector>>(), reconstructor, modelFactory);
             if (Directory.Exists(location))
             {
                 model.Load(location);
@@ -46,7 +44,7 @@ namespace Wikiled.Text.Anomaly.Supervised
             return model;
         }
 
-        public void Save(string name, IModelStorage storage)
+        public void Save(string name, IModelStorage<SvmAnomalyDetector> storage)
         {
             if (storage == null)
             {

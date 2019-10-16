@@ -17,21 +17,21 @@ using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {
-    public class SvmAnomalyDetector : IAnomalyDetector, IModel
+    public class SvmAnomalyDetector : IAnomalyDetector
     {
         private readonly IDocumentVectorSource vectorSource;
 
         private readonly ILogger logger;
 
-        public SvmAnomalyDetector(IDocumentVectorSource vectorSource, ILoggerFactory factory, SupportVectorMachine<Linear> model)
+        public SvmAnomalyDetector(ILoggerFactory loggerFactory, IDocumentVectorSource vectorSource, SupportVectorMachine<Linear> model)
         {
-            if (factory == null)
+            if (loggerFactory == null)
             {
-                throw new ArgumentNullException(nameof(factory));
+                throw new ArgumentNullException(nameof(loggerFactory));
             }
 
             this.vectorSource = vectorSource ?? throw new ArgumentNullException(nameof(vectorSource));
-            logger = factory.CreateLogger(GetType());
+            logger = loggerFactory.CreateLogger(GetType());
             Model = model;
         }
 

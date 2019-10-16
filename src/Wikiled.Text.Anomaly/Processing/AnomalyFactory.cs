@@ -24,7 +24,7 @@ namespace Wikiled.Text.Anomaly.Processing
             return new DocumentAnomalyDetector(
                 loggerFactory.CreateLogger<DocumentAnomalyDetector>(),
                 document,
-                new AnomalyFilterFactory(loggerFactory.CreateLogger<AnomalyFilterFactory>(), documentVector),
+                new AnomalyFilterFactory(loggerFactory, documentVector),
                 new DocumentReconstructor(),
                 windowSize);
         }

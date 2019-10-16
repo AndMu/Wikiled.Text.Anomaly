@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Microsoft.Extensions.Logging.Abstractions;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Wikiled.Text.Analysis.Structure;
@@ -21,7 +22,7 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
         public void Setup()
         {
             document = new ComplexDocument(Global.InitDocument("cv002_17424.txt"));
-            instance = new AnomalyFactory(new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin"))));
+            instance = new AnomalyFactory(new NullLoggerFactory(), new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin"))));
         }
 
         [Test]
@@ -33,7 +34,7 @@ namespace Wikiled.Text.Anomaly.Tests.Processing
             Assert.AreEqual(784, document.Sentences.Length);
             Assert.AreEqual(627, result.Document.Sentences.Count);
             Assert.AreEqual(28, result.Anomaly.Length);
-            Assert.AreEqual(9, result.Anomaly[0].Sentences.Length);
+            Assert.AreEqual(9, result.Anomaly[0].Sentences.Count);
             Assert.AreEqual("Kevin DiCiurcio, CFA Joshua M.", result.Anomaly[0].Sentences[0].Text);
         }
 

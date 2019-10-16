@@ -31,7 +31,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
         {
             GlobalSettings.Random = new Random(48);
             vectorSource = new EmbeddingVectorSource(WordModel.Load(Path.Combine(TestContext.CurrentContext.TestDirectory, @"Data\model.bin")));
-            pageDetector = new SvmAnomalyDetector(vectorSource, new NullLoggerFactory(), null);
+            pageDetector = new SvmAnomalyDetector(new NullLoggerFactory(), vectorSource, null);
             document = new ComplexDocument(JsonConvert.DeserializeObject<Document[]>(File.ReadAllText(Path.Combine(TestContext.CurrentContext.TestDirectory, "Data", "docs.json"))));
         }
 
@@ -57,8 +57,8 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
         [Test]
         public void Construct()
         {
-            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyDetector(null, new NullLoggerFactory(), null));
-            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyDetector(vectorSource, null, null));
+            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyDetector(new NullLoggerFactory(), null, null));
+            Assert.Throws<ArgumentNullException>(() => new SvmAnomalyDetector(null, vectorSource, null));
         }
     }
 }

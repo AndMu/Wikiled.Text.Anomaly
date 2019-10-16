@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Wikiled.Common.Testing.Utilities.Reflection;
 using Wikiled.Text.Analysis.Structure;
 using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Analysis.Word2Vec;
@@ -25,7 +26,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
 
         private IDocumentReconstructor documentReconstructor;
 
-        private SvmModelStorage instance;
+        private ModelStorage<SvmAnomalyDetector> instance;
 
         private Document[] documents;
 
@@ -42,18 +43,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
         [Test]
         public void Construct()
         {
-            Assert.Throws<ArgumentNullException>(() => new SvmModelStorage(
-                null,
-                vectorSource,
-                documentReconstructor));
-            Assert.Throws<ArgumentNullException>(() => new SvmModelStorage(
-                loggerFactory,
-                null,
-                documentReconstructor));
-            Assert.Throws<ArgumentNullException>(() => new SvmModelStorage(
-                loggerFactory,
-                vectorSource,
-                null));
+            ConstructorHelper.ConstructorMustThrowArgumentNullException(typeof(ModelStorage<SvmAnomalyDetector>));
         }
 
         [Test]
@@ -65,7 +55,7 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
             instance.Add(DataType.Negative, negative);
             var pageDetector = await instance.Train(CancellationToken.None).ConfigureAwait(false);
 
-            var result = pageDetector.Predict(new DocumentBlock(documents).Pages).Select(item => item ? 1 : 0).ToArray();
+            var result = pageDetector.Predict(new ComplexDocument(documents).Pages).Select(item => item ? 1 : 0).ToArray();
             var expected = new int[documents.Length];
             for (int i = 2; i <= 30; i++)
             {
@@ -77,24 +67,24 @@ namespace Wikiled.Text.Anomaly.Tests.Supervised
             Assert.GreaterOrEqual(cm.PerClassMatrices[1].FScore, 0.9);
 
             instance.Save("Result");
-            SvmModelStorageFactory storageFactory = new SvmModelStorageFactory(
+            var storageFactory = new SvmModelStorageFactory(
                 loggerFactory,
-                vectorSource,
                 documentReconstructor,
-                new StorageConfig { Location = TestContext.CurrentContext.TestDirectory });
-            instance = (SvmModelStorage)storageFactory.Construct("Result");
-            result = pageDetector.Predict(new DocumentBlock(documents).Pages).Select(item => item ? 1 : 0).ToArray();
+                new StorageConfig { Location = TestContext.CurrentContext.TestDirectory },
+                new SvmAnomalyDetectorFactory(loggerFactory, vectorSource));
+            instance = (ModelStorage<SvmAnomalyDetector>)storageFactory.Construct("Result");
+            result = pageDetector.Predict(new ComplexDocument(documents).Pages).Select(item => item ? 1 : 0).ToArray();
             cm = new GeneralConfusionMatrix(2, expected: expected, predicted: result);
             Assert.GreaterOrEqual(cm.PerClassMatrices[0].FScore, 0.8);
             Assert.GreaterOrEqual(cm.PerClassMatrices[1].FScore, 0.9);
         }
 
-        private SvmModelStorage CreateModelStorage()
+        private ModelStorage<SvmAnomalyDetector> CreateModelStorage()
         {
-            return new SvmModelStorage(
-                loggerFactory,
-                vectorSource,
-                documentReconstructor);
+            return new ModelStorage<SvmAnomalyDetector>(
+                loggerFactory.CreateLogger<ModelStorage<SvmAnomalyDetector>>(),
+                documentReconstructor,
+                new SvmAnomalyDetectorFactory(loggerFactory, vectorSource));
         }
     }
 }
