@@ -6,11 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>    
-    <PackageReference Include="Moq" Version="4.13.0" />
+    <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="NUnit" version="3.12.0" />
-    <PackageReference Include="wikiled.Common.Testing.Utilities" Version="1.2.20" />
+    <PackageReference Include="wikiled.Common.Testing.Utilities" Version="1.2.22" />
     <PackageReference Include="Wikiled.MachineLearning" Version="2.4.25" />
-    <PackageReference Include="Wikiled.Text.Analysis" Version="1.7.28-CI" />
+    <PackageReference Include="Wikiled.Text.Analysis" Version="1.7.30" />
     <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.25" />
     <PackageReference Include="Wikiled.Text.Style" Version="1.0.23" />
     <packagereference Include="Microsoft.NET.Test.Sdk" Version="16.3.0"></packagereference>

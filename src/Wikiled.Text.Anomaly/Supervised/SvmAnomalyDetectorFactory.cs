@@ -5,7 +5,7 @@ using Accord.MachineLearning.VectorMachines;
 using Accord.Statistics.Kernels;
 using Microsoft.Extensions.Logging;
 using Wikiled.Common.Extensions;
-using Wikiled.Text.Analysis.Structure.Model;
+using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Supervised

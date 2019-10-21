@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using MoreLinq.Extensions;
 using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Anomaly.Processing.Filters;
 using Wikiled.Text.Anomaly.Structure;
 

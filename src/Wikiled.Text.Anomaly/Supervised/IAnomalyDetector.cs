@@ -1,5 +1,5 @@
 ﻿using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Analysis.Structure.Model;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {

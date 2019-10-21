@@ -10,8 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Wikiled.Common.Testing.Utilities.Reflection;
 using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Analysis.Word2Vec;
+using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Supervised;
 using Wikiled.Text.Anomaly.Vectors;
 

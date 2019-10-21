@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
-using Wikiled.Text.Analysis.Structure.Model;
+using Wikiled.Text.Anomaly.Structure;
 
 namespace Wikiled.Text.Anomaly.Supervised
 {
@@ -13,7 +13,7 @@ namespace Wikiled.Text.Anomaly.Supervised
 
         private readonly StorageConfig config;
 
-        private IModelFactory<SvmAnomalyDetector> modelFactory;
+        private readonly IModelFactory<SvmAnomalyDetector> modelFactory;
 
         public SvmModelStorageFactory(ILoggerFactory factory, IDocumentReconstructor reconstructor, StorageConfig config, IModelFactory<SvmAnomalyDetector> modelFactory)
         {

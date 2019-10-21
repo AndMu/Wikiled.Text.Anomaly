@@ -1,8 +1,8 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 using Wikiled.Text.Analysis.Structure;
-using Wikiled.Text.Analysis.Structure.Model;
 using Wikiled.Text.Anomaly.Processing.Filters;
+using Wikiled.Text.Anomaly.Structure;
 using Wikiled.Text.Anomaly.Vectors;
 
 namespace Wikiled.Text.Anomaly.Processing

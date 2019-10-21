@@ -16,9 +16,9 @@
   <ItemGroup>
     <PackageReference Include="Accord.MachineLearning" Version="3.8.0" />
     <PackageReference Include="morelinq" Version="3.2.0" />
-    <PackageReference Include="Wikiled.Common.Utilities" Version="1.2.20" />
+    <PackageReference Include="Wikiled.Common.Utilities" Version="1.2.22" />
     <PackageReference Include="Wikiled.MachineLearning" Version="2.4.25" />
-    <PackageReference Include="Wikiled.Text.Analysis" Version="1.7.28-CI" />
+    <PackageReference Include="Wikiled.Text.Analysis" Version="1.7.30" />
     <PackageReference Include="Wikiled.Text.Inquirer" Version="1.2.25" />
     <PackageReference Include="Wikiled.Text.Style" Version="1.0.23" />
   </ItemGroup>
